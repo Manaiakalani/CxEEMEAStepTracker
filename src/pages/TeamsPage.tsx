@@ -1,6 +1,6 @@
 import { Check, Users } from "lucide-react";
 import { useStore, leaderboardWith } from "../store";
-import { BAYERN, BAYERN_SOFT, HAIRLINE, INK, MUTED } from "../theme";
+import { BAYERN, BAYERN_SOFT, HAIRLINE, INK, MUTED, SURFACE } from "../theme";
 import { formatNumber } from "../lib/format";
 
 export function TeamsPage() {
@@ -44,7 +44,7 @@ export function TeamsPage() {
                     className="w-full text-left p-5 rounded-lg border transition-all hover:border-[color:var(--bayern)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                     style={{
                       borderColor: isMine ? BAYERN : HAIRLINE,
-                      background: isMine ? BAYERN_SOFT : "#FFFFFF",
+                      background: isMine ? BAYERN_SOFT : SURFACE,
                       ["--bayern" as any]: BAYERN,
                       ["--tw-ring-color" as any]: BAYERN,
                     }}

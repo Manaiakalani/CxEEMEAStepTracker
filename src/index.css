@@ -13,8 +13,47 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+
+  /* Light theme (default) */
   color-scheme: light;
-  background: #ffffff;
+  --color-bayern: #1761a0;
+  --color-bayern-deep: #114f84;
+  --color-bayern-soft: #e8f0f8;
+  --color-ink: #0b1620;
+  --color-muted: #6b7785;
+  --color-hairline: #e5e9ee;
+  --color-success: #2e7d5a;
+  --color-warn: #c97a1a;
+  --color-bar-rest: #9fb6cc;
+
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-hover: #f5f5f4;
+
+  --hero-1: #f4f8fc;
+  --hero-2: #fbfcfd;
+  --hero-3: #ffffff;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bayern: #5ba3db;
+  --color-bayern-deep: #3e86bd;
+  --color-bayern-soft: #14304a;
+  --color-ink: #f1f5fa;
+  --color-muted: #8fa1b5;
+  --color-hairline: #1f3142;
+  --color-success: #58c29a;
+  --color-warn: #e0a55c;
+  --color-bar-rest: #3a536b;
+
+  --surface: #08111a;
+  --surface-raised: #11202d;
+  --surface-hover: #18293a;
+
+  --hero-1: #0e1a26;
+  --hero-2: #0b1620;
+  --hero-3: #08111a;
 }
 
 html,
@@ -25,8 +64,11 @@ body,
 
 body {
   margin: 0;
-  background: #ffffff;
-  color: #0b1620;
+  background: var(--surface);
+  color: var(--color-ink);
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
 }
 
 button {
@@ -36,6 +78,45 @@ button {
 
 input {
   font-family: inherit;
+}
+
+/* Theme-aware utility classes -------------------------------------------- */
+
+.surface {
+  background: var(--surface);
+}
+
+.surface-raised {
+  background: var(--surface-raised);
+}
+
+/* Translucent raised surface (replaces `bg-white/90`) */
+.surface-translucent {
+  background: color-mix(in srgb, var(--surface-raised) 90%, transparent);
+}
+
+.surface-translucent-soft {
+  background: color-mix(in srgb, var(--surface-raised) 70%, transparent);
+}
+
+.hover-surface {
+  transition: background-color 150ms ease;
+}
+.hover-surface:hover {
+  background: var(--surface-hover);
+}
+
+.focus-surface:focus-visible {
+  background: var(--surface-hover);
+}
+
+.hero-gradient {
+  background: linear-gradient(
+    180deg,
+    var(--hero-1) 0%,
+    var(--hero-2) 70%,
+    var(--hero-3) 100%
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {

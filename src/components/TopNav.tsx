@@ -3,6 +3,8 @@ import {
   Trophy,
   Users,
   User as UserIcon,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useStore, type TabKey } from "../store";
 import { BAYERN, HAIRLINE, INK, MUTED } from "../theme";
@@ -15,10 +17,10 @@ const ITEMS: { key: TabKey; label: string; icon: typeof LayoutDashboard }[] = [
 ];
 
 export function TopNav() {
-  const { tab, setTab } = useStore();
+  const { tab, setTab, theme, toggleTheme } = useStore();
   return (
     <nav
-      className="border-b bg-white/90 backdrop-blur-sm sticky top-0 z-20"
+      className="border-b surface-translucent backdrop-blur-sm sticky top-0 z-20"
       style={{ borderColor: HAIRLINE }}
     >
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10 flex items-center justify-between h-14">
@@ -51,7 +53,7 @@ export function TopNav() {
               <li key={it.key}>
                 <button
                   onClick={() => setTab(it.key)}
-                  className="relative h-14 px-3 sm:px-4 inline-flex items-center gap-2 text-[13px] font-medium tracking-tight transition-colors focus:outline-none focus-visible:bg-stone-50"
+                  className="relative h-14 px-3 sm:px-4 inline-flex items-center gap-2 text-[13px] font-medium tracking-tight transition-colors focus:outline-none focus-surface"
                   style={{ color: active ? INK : MUTED }}
                   aria-current={active ? "page" : undefined}
                 >
@@ -67,6 +69,30 @@ export function TopNav() {
               </li>
             );
           })}
+          <li className="ml-1 sm:ml-2">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={
+                theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+              }
+              title={
+                theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+              }
+              className="h-9 w-9 rounded-full border inline-flex items-center justify-center hover-surface focus:outline-none focus-visible:ring-2"
+              style={{
+                borderColor: HAIRLINE,
+                color: MUTED,
+                ["--tw-ring-color" as any]: BAYERN,
+              }}
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4" strokeWidth={1.75} />
+              ) : (
+                <Moon className="w-4 h-4" strokeWidth={1.75} />
+              )}
+            </button>
+          </li>
         </ul>
       </div>
     </nav>

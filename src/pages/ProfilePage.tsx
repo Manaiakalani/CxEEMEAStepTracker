@@ -179,7 +179,7 @@ export function ProfilePage() {
             ) : (
               <button
                 onClick={() => setConfirmReset("week")}
-                className="h-11 px-4 rounded-full border text-[13px] font-medium tracking-tight hover:bg-stone-50"
+                className="h-11 px-4 rounded-full border text-[13px] font-medium tracking-tight hover-surface"
                 style={{ borderColor: HAIRLINE, color: INK }}
               >
                 Reset this week
@@ -200,7 +200,7 @@ export function ProfilePage() {
             ) : (
               <button
                 onClick={() => setConfirmReset("all")}
-                className="h-11 px-4 rounded-full border text-[13px] font-medium tracking-tight hover:bg-stone-50"
+                className="h-11 px-4 rounded-full border text-[13px] font-medium tracking-tight hover-surface"
                 style={{ borderColor: HAIRLINE, color: INK }}
               >
                 Reset all data
@@ -277,7 +277,7 @@ function ConfirmRow({
       </button>
       <button
         onClick={onCancel}
-        className="h-11 px-4 rounded-full border text-[13px] font-medium hover:bg-stone-50"
+        className="h-11 px-4 rounded-full border text-[13px] font-medium hover-surface"
         style={{ borderColor: HAIRLINE, color: INK }}
       >
         Cancel

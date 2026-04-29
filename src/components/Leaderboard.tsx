@@ -1,5 +1,5 @@
 import { useStore, leaderboardWith } from "../store";
-import { BAYERN, BAYERN_SOFT, HAIRLINE, INK, MUTED } from "../theme";
+import { BAR_REST, BAYERN, BAYERN_SOFT, HAIRLINE, INK, MUTED } from "../theme";
 import { formatNumber } from "../lib/format";
 
 export function Leaderboard({
@@ -42,7 +42,7 @@ export function Leaderboard({
           {showAllToggle && (
             <button
               onClick={onSeeAll}
-              className="h-11 px-4 -mr-4 rounded-full text-[13px] font-medium tracking-tight hover:bg-stone-50 transition-colors"
+              className="h-11 px-4 -mr-4 rounded-full text-[13px] font-medium tracking-tight hover-surface transition-colors"
               style={{ color: BAYERN }}
             >
               See all teams
@@ -104,7 +104,7 @@ export function Leaderboard({
                       className="h-full rounded-full"
                       style={{
                         width: `${pct}%`,
-                        background: t.mine ? BAYERN : "#9FB6CC",
+                        background: t.mine ? BAYERN : BAR_REST,
                         transition: "width 500ms ease",
                       }}
                     />

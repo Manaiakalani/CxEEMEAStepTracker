@@ -1,5 +1,5 @@
 import { useStore } from "../store";
-import { BAYERN, HAIRLINE, INK, MUTED } from "../theme";
+import { BAR_REST, BAYERN, HAIRLINE, INK, MUTED } from "../theme";
 import { formatNumber, isoDate, lastNDays, shortDayLabel } from "../lib/format";
 
 export function WeeklyChart() {
@@ -89,7 +89,7 @@ export function WeeklyChart() {
                       background: day.today
                         ? BAYERN
                         : met
-                          ? "#9FB6CC"
+                          ? BAR_REST
                           : HAIRLINE,
                       transition: "height 500ms ease",
                     }}

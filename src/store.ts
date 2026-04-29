@@ -12,6 +12,7 @@ import { isoDate, lastNDays } from "./lib/format";
 import { SEED_PRIOR_DAYS, TEAMS } from "./data";
 
 export type TabKey = "dashboard" | "leaderboard" | "teams" | "profile";
+export type ThemeMode = "light" | "dark";
 
 export type ActivityEntry = {
   id: string;
@@ -36,6 +37,7 @@ type Persisted = {
 };
 
 const STORAGE_KEY = "alpine-step-tracker:v1";
+const THEME_STORAGE_KEY = "alpine-step-tracker:theme";
 const DEFAULT_PROFILE: Profile = {
   name: "Anja",
   team: "Threat Protection",
@@ -135,6 +137,23 @@ function loadInitial(): Persisted {
   }
 }
 
+function loadInitialTheme(): ThemeMode {
+  if (typeof window === "undefined") return "light";
+  try {
+    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === "light" || stored === "dark") return stored;
+  } catch {
+    /* ignore */
+  }
+  if (
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  ) {
+    return "dark";
+  }
+  return "light";
+}
+
 type StoreValue = {
   profile: Profile;
   entries: Record<string, number>;
@@ -142,9 +161,12 @@ type StoreValue = {
   tab: TabKey;
   todayKey: string;
   todaySteps: number;
+  theme: ThemeMode;
   setTab: (t: TabKey) => void;
   addSteps: (amount: number, source?: "manual" | "quick") => void;
   setProfile: (p: Partial<Profile>) => void;
+  toggleTheme: () => void;
+  setTheme: (t: ThemeMode) => void;
   resetWeek: () => void;
   resetAll: () => void;
 };
@@ -154,6 +176,24 @@ const StoreContext = createContext<StoreValue | null>(null);
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<Persisted>(() => loadInitial());
   const [tab, setTab] = useState<TabKey>("dashboard");
+  const [theme, setThemeState] = useState<ThemeMode>(() => loadInitialTheme());
+
+  // Apply theme to <html data-theme=...> and persist.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute("data-theme", theme);
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {
+      /* ignore */
+    }
+  }, [theme]);
+
+  const setTheme = useCallback((t: ThemeMode) => setThemeState(t), []);
+  const toggleTheme = useCallback(
+    () => setThemeState((cur) => (cur === "dark" ? "light" : "dark")),
+    [],
+  );
 
   // Track "now" so today rolls over at midnight without a refresh. We
   // re-tick every minute, plus when the tab regains visibility.
@@ -241,13 +281,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       tab,
       todayKey,
       todaySteps,
+      theme,
       setTab,
       addSteps,
       setProfile,
+      toggleTheme,
+      setTheme,
       resetWeek,
       resetAll,
     }),
-    [state, tab, todayKey, todaySteps, addSteps, setProfile, resetWeek, resetAll],
+    [
+      state,
+      tab,
+      todayKey,
+      todaySteps,
+      theme,
+      addSteps,
+      setProfile,
+      toggleTheme,
+      setTheme,
+      resetWeek,
+      resetAll,
+    ],
   );
 
   return createElement(StoreContext.Provider, { value }, children);

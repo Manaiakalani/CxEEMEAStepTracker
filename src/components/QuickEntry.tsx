@@ -1,12 +1,11 @@
 import { Plus, Check } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useStore } from "../store";
-import { QUICK_ADDS } from "../data";
 import { BAYERN, HAIRLINE, INK, MUTED, SUCCESS } from "../theme";
 
 export function QuickEntry() {
   const { addSteps } = useStore();
-  const [raw, setRaw] = useState<string>("2400");
+  const [raw, setRaw] = useState<string>("");
   const [confirmAt, setConfirmAt] = useState<number | null>(null);
 
   function showConfirm() {
@@ -23,11 +22,6 @@ export function QuickEntry() {
     if (!Number.isFinite(n) || n <= 0) return;
     addSteps(n, "manual");
     setRaw("");
-    showConfirm();
-  }
-
-  function quickAdd(n: number) {
-    addSteps(n, "quick");
     showConfirm();
   }
 
@@ -79,19 +73,6 @@ export function QuickEntry() {
                   className="w-full h-12 bg-transparent border-0 border-b text-[28px] font-medium tracking-tight tabular-nums focus:outline-none focus:border-b-2"
                   style={{ borderColor: HAIRLINE, color: INK }}
                 />
-              </div>
-              <div className="flex gap-2 pb-1 flex-wrap">
-                {QUICK_ADDS.map((v) => (
-                  <button
-                    type="button"
-                    key={v}
-                    onClick={() => quickAdd(v)}
-                    className="h-11 px-4 rounded-full border text-[12.5px] font-medium tracking-tight hover:bg-stone-50 transition-colors"
-                    style={{ borderColor: HAIRLINE, color: MUTED }}
-                  >
-                    +{v.toLocaleString()}
-                  </button>
-                ))}
               </div>
               <button
                 type="submit"

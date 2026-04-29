@@ -16,13 +16,7 @@ export function Hero() {
 
   return (
     <header className="relative overflow-hidden">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, #F4F8FC 0%, #FBFCFD 70%, #FFFFFF 100%)",
-        }}
-      />
+      <div className="absolute inset-0 hero-gradient" />
       <MountainSilhouette />
       <div className="relative max-w-[1200px] mx-auto px-6 sm:px-10 pt-12 sm:pt-16 pb-20 sm:pb-24">
         <div className="flex items-start justify-between gap-8 sm:gap-12 flex-col sm:flex-row">
@@ -48,7 +42,7 @@ export function Hero() {
           </div>
           <div className="flex items-center gap-3 pt-2">
             <div
-              className="flex items-center gap-2 h-9 px-3 rounded-full border bg-white/70"
+              className="flex items-center gap-2 h-9 px-3 rounded-full border surface-translucent-soft"
               style={{ borderColor: HAIRLINE }}
             >
               <Cloud

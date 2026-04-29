@@ -61,6 +61,20 @@ export const CHALLENGES: ChallengeDef[] = [
       "From shimmering BMW Welt to the 1972 Olympic complex — engineering and architecture.",
     target: 9000,
   },
+  {
+    id: "hofbrauhaus",
+    name: "Hofbräuhaus Stein Stroll",
+    story:
+      "From Marienplatz down to the world's most famous beer hall, founded by Duke Wilhelm V in 1589.",
+    target: 7500,
+  },
+  {
+    id: "nymphenburg",
+    name: "Nymphenburg Palace Gardens",
+    story:
+      "Wander the baroque grounds where Bavarian royals once strolled — 200 hectares of canals, lakes, and pavilions.",
+    target: 11000,
+  },
 ];
 
 export type SeedTeam = {
@@ -93,8 +107,3 @@ export const TEAMS: SeedTeam[] = [
  * starts at 0 — the user logs their own.
  */
 export const SEED_PRIOR_DAYS: number[] = [7820, 9410, 6240, 8120, 5310, 11240];
-
-/**
- * Quick-add chip values shown next to the step input.
- */
-export const QUICK_ADDS: number[] = [500, 1000, 2500];

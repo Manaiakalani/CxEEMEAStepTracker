@@ -33,7 +33,7 @@ export function Challenges() {
           </div>
           <button
             onClick={() => setShowAll((v) => !v)}
-            className="h-11 px-4 -mr-4 rounded-full text-[13px] font-medium tracking-tight inline-flex items-center gap-1 hover:bg-stone-50 transition-colors"
+            className="h-11 px-4 -mr-4 rounded-full text-[13px] font-medium tracking-tight inline-flex items-center gap-1 hover-surface transition-colors"
             style={{ color: BAYERN }}
           >
             {showAll ? "Show fewer" : `View all ${CHALLENGES.length}`}
