@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      // Public-read leaderboard: any signed-in user (incl. anonymous) may read.
+      allow read: if request.auth != null;
+
+      // A user may only create or update their own document, and only if the
+      // payload matches the expected shape.
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && isValidUserDoc(request.resource.data);
+
+      // Deletes are not allowed from the client.
+      allow delete: if false;
+    }
+
+    function isValidUserDoc(data) {
+      return data.keys().hasOnly(['name', 'team', 'goal', 'entries', 'updatedAt'])
+        && data.name is string && data.name.size() <= 60
+        && data.team is string && data.team.size() <= 60
+        && data.goal is number && data.goal <= 200000 && data.goal >= 0
+        && data.entries is map;
+    }
+  }
+}

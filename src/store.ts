@@ -4,12 +4,15 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { createElement } from "react";
 import { isoDate, lastNDays } from "./lib/format";
 import { SEED_PRIOR_DAYS, TEAMS } from "./data";
+import { isFirebaseConfigured } from "./firebase-config";
+import { pushUserSnapshot, signInAnon } from "./lib/cloud-sync";
 
 export type TabKey =
   | "dashboard"
@@ -43,6 +46,9 @@ type Persisted = {
 
 const STORAGE_KEY = "alpine-step-tracker:v1";
 const THEME_STORAGE_KEY = "alpine-step-tracker:theme";
+const CLOUD_SYNC_STORAGE_KEY = "alpine-step-tracker:cloud-sync";
+
+export type CloudStatus = "off" | "connecting" | "synced" | "error";
 const DEFAULT_PROFILE: Profile = {
   name: "Anja",
   team: "Threat Protection",
@@ -167,6 +173,8 @@ type StoreValue = {
   todayKey: string;
   todaySteps: number;
   theme: ThemeMode;
+  cloudSync: boolean;
+  cloudStatus: CloudStatus;
   setTab: (t: TabKey) => void;
   addSteps: (amount: number, source?: "manual" | "quick") => void;
   setProfile: (p: Partial<Profile>) => void;
@@ -174,7 +182,17 @@ type StoreValue = {
   setTheme: (t: ThemeMode) => void;
   resetWeek: () => void;
   resetAll: () => void;
+  setCloudSync: (enabled: boolean) => void;
 };
+
+function loadInitialCloudSync(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(CLOUD_SYNC_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 const StoreContext = createContext<StoreValue | null>(null);
 
@@ -182,6 +200,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<Persisted>(() => loadInitial());
   const [tab, setTab] = useState<TabKey>("dashboard");
   const [theme, setThemeState] = useState<ThemeMode>(() => loadInitialTheme());
+  const [cloudSync, setCloudSyncState] = useState<boolean>(() =>
+    loadInitialCloudSync(),
+  );
+  const [cloudStatus, setCloudStatus] = useState<CloudStatus>("off");
+  const cloudUidRef = useRef<string | null>(null);
 
   // Apply theme to <html data-theme=...> and persist.
   useEffect(() => {
@@ -276,6 +299,84 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setState(fresh);
   }, []);
 
+  const setCloudSync = useCallback(
+    (enabled: boolean) => {
+      setCloudSyncState(enabled);
+      try {
+        window.localStorage.setItem(
+          CLOUD_SYNC_STORAGE_KEY,
+          enabled ? "1" : "0",
+        );
+      } catch {
+        /* ignore */
+      }
+      if (!enabled) {
+        setCloudStatus("off");
+        cloudUidRef.current = null;
+        return;
+      }
+      if (!isFirebaseConfigured()) {
+        console.warn(
+          "[cloud-sync] Cloud sync enabled but firebase-config.ts is empty.",
+        );
+        setCloudStatus("error");
+        return;
+      }
+      setCloudStatus("connecting");
+      void (async () => {
+        const uid = await signInAnon();
+        if (!uid) {
+          setCloudStatus("error");
+          return;
+        }
+        cloudUidRef.current = uid;
+        const ok = await pushUserSnapshot(uid, {
+          name: state.profile.name,
+          team: state.profile.team,
+          goal: state.profile.goal,
+          entries: state.entries,
+        });
+        setCloudStatus(ok ? "synced" : "error");
+      })();
+    },
+    [state.profile, state.entries],
+  );
+
+  // Debounced background mirror of profile + entries to Firestore whenever
+  // they change, but only while cloud sync is on and configured.
+  useEffect(() => {
+    if (!cloudSync) return;
+    if (!isFirebaseConfigured()) {
+      setCloudStatus("error");
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      let uid = cloudUidRef.current;
+      if (!uid) {
+        setCloudStatus("connecting");
+        uid = await signInAnon();
+        if (!uid || cancelled) {
+          if (!cancelled) setCloudStatus("error");
+          return;
+        }
+        cloudUidRef.current = uid;
+      }
+      const ok = await pushUserSnapshot(uid, {
+        name: state.profile.name,
+        team: state.profile.team,
+        goal: state.profile.goal,
+        entries: state.entries,
+      });
+      if (cancelled) return;
+      setCloudStatus(ok ? "synced" : "error");
+    }, 600);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [cloudSync, state.profile, state.entries]);
+
   const todaySteps = state.entries[todayKey] ?? 0;
 
   const value = useMemo<StoreValue>(
@@ -287,6 +388,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       todayKey,
       todaySteps,
       theme,
+      cloudSync,
+      cloudStatus,
       setTab,
       addSteps,
       setProfile,
@@ -294,6 +397,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setTheme,
       resetWeek,
       resetAll,
+      setCloudSync,
     }),
     [
       state,
@@ -301,12 +405,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       todayKey,
       todaySteps,
       theme,
+      cloudSync,
+      cloudStatus,
       addSteps,
       setProfile,
       toggleTheme,
       setTheme,
       resetWeek,
       resetAll,
+      setCloudSync,
     ],
   );
 

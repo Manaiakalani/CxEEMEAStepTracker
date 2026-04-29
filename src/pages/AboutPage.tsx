@@ -89,6 +89,14 @@ const SECTIONS: Section[] = [
             site data for this page also removes everything immediately.
           </li>
           <li>
+            <strong>Cloud sync is opt-in.</strong> A "Cloud sync" toggle on
+            the Profile screen is <strong>off by default</strong>. When you
+            switch it on, only your display name, team, daily goal, and step
+            counts are sent to a shared Firebase project so the leaderboard
+            can reflect everyone in real time. Turn it off any time and your
+            local data stays put.
+          </li>
+          <li>
             <strong>Third parties.</strong> The app loads the{" "}
             <em>Inter</em> typeface from Google Fonts. No other third-party
             services are used. The site is served from GitHub Pages.

@@ -94,6 +94,17 @@ full control of your own data at all times.
 A more detailed write-up — privacy notice, Munich theme days, suggested
 routes, and an FAQ — is available inside the app on the **About** tab.
 
+## ☁️ Optional cloud sync
+
+By default this app is fully local — nothing leaves your browser. There is
+also an **opt-in** Firebase Firestore sync that, when enabled, mirrors only
+your display name, team, daily goal, and step totals so a shared leaderboard
+can update in real time across devices. It's off by default and can be
+toggled from **Profile → Cloud sync** at any time.
+
+Repo owners: see [`docs/firebase-setup.md`](./docs/firebase-setup.md) for the
+one-time Firebase Console setup, the security rules, and how to deploy them.
+
 ## 🤝 Contributing
 
 This is an internal offsite project, but PRs and ideas are welcome from CxE EMEA folks. Please:

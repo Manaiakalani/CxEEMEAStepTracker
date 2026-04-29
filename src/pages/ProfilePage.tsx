@@ -1,11 +1,21 @@
 import { useState } from "react";
-import { useStore, weekTotalFor } from "../store";
+import { useStore, weekTotalFor, type CloudStatus } from "../store";
 import { TEAMS } from "../data";
 import { BAYERN, HAIRLINE, INK, MUTED } from "../theme";
 import { formatNumber } from "../lib/format";
+import { isFirebaseConfigured } from "../firebase-config";
 
 export function ProfilePage() {
-  const { profile, entries, setProfile, resetWeek, resetAll } = useStore();
+  const {
+    profile,
+    entries,
+    setProfile,
+    resetWeek,
+    resetAll,
+    cloudSync,
+    cloudStatus,
+    setCloudSync,
+  } = useStore();
   const [name, setName] = useState(profile.name);
   const [goal, setGoal] = useState(String(profile.goal));
   const [team, setTeam] = useState(profile.team);
@@ -119,6 +129,72 @@ export function ProfilePage() {
                 Saved.
               </span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b" style={{ borderColor: HAIRLINE }}>
+        <div className="max-w-[1200px] mx-auto px-6 sm:px-10 py-12 grid grid-cols-12 gap-8">
+          <div className="col-span-12 md:col-span-4">
+            <p
+              className="text-[12px] uppercase tracking-[0.18em] mb-3"
+              style={{ color: MUTED }}
+            >
+              Cloud sync
+            </p>
+            <h2
+              className="text-[22px] font-medium tracking-tight"
+              style={{ color: INK }}
+            >
+              Cloud sync (optional).
+            </h2>
+            <p className="text-[13.5px] mt-1" style={{ color: MUTED }}>
+              Off by default. Local-first stays the default experience.
+            </p>
+          </div>
+          <div className="col-span-12 md:col-span-8 flex flex-col gap-4 items-start">
+            <p
+              className="text-[14px] leading-[1.6] max-w-[60ch]"
+              style={{ color: MUTED }}
+            >
+              Sync your name, team, and step totals to a shared Firebase
+              project so the leaderboard reflects everyone in real time. You
+              can turn this off anytime; your local data stays put. When off,
+              this app is fully local and offline.
+            </p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={() => setCloudSync(!cloudSync)}
+                aria-pressed={cloudSync}
+                className="h-12 px-6 rounded-full inline-flex items-center gap-2 text-[14px] font-medium tracking-tight transition-all"
+                style={
+                  cloudSync
+                    ? { background: BAYERN, color: "#fff" }
+                    : {
+                        border: `1px solid ${HAIRLINE}`,
+                        color: INK,
+                        background: "transparent",
+                      }
+                }
+              >
+                {cloudSync ? "Cloud sync on" : "Turn cloud sync on"}
+              </button>
+              <CloudStatusPill status={cloudStatus} enabled={cloudSync} />
+            </div>
+            {cloudSync && cloudStatus === "error" ? (
+              <div
+                className="text-[13px] leading-[1.55] rounded-md px-4 py-3 max-w-[60ch]"
+                style={{
+                  border: `1px solid ${HAIRLINE}`,
+                  color: INK,
+                  background: "transparent",
+                }}
+              >
+                Cloud sync isn't configured for this build yet. Your data is
+                still safe on this device. Ask the offsite organiser to finish
+                the Firebase setup, then toggle this back on.
+              </div>
+            ) : null}
           </div>
         </div>
       </section>
@@ -283,5 +359,34 @@ function ConfirmRow({
         Cancel
       </button>
     </div>
+  );
+}
+
+function CloudStatusPill({
+  status,
+  enabled,
+}: {
+  status: CloudStatus;
+  enabled: boolean;
+}) {
+  let label = "Off";
+  if (enabled) {
+    if (!isFirebaseConfigured()) label = "Cloud not configured";
+    else if (status === "connecting") label = "Connecting…";
+    else if (status === "synced") label = "Synced";
+    else if (status === "error") label = "Cloud not configured";
+    else label = "Off";
+  }
+  return (
+    <span
+      className="inline-flex items-center h-7 px-3 rounded-full text-[11.5px] font-medium tracking-tight"
+      style={{
+        border: `1px solid ${HAIRLINE}`,
+        color: MUTED,
+      }}
+      aria-live="polite"
+    >
+      {label}
+    </span>
   );
 }
