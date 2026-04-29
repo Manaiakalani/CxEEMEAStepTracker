@@ -1,1 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#1761A0"/><text x="16" y="22" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="18" font-weight="600" fill="#fff">S</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="CxE EMEA Step Tracker">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1F75B8"/>
+      <stop offset="100%" stop-color="#114F84"/>
+    </linearGradient>
+    <linearGradient id="snow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E8F0F8"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7" fill="url(#bg)"/>
+  <path d="M3 25 L10 17 L15 22 L21 10 L29 25 Z" fill="url(#snow)"/>
+  <path d="M10 17 L8.2 19.1 L10 19.6 L11.8 19.1 Z" fill="#114F84" opacity="0.22"/>
+  <path d="M21 10 L18.6 12.8 L21 13.5 L23.4 12.8 Z" fill="#114F84" opacity="0.22"/>
+</svg>

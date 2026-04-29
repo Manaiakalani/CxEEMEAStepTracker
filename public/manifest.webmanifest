@@ -1,0 +1,24 @@
+{
+  "name": "CxE EMEA Offsite 2026 — Step Tracker",
+  "short_name": "Step Tracker",
+  "description": "Munich-themed step tracker for the CxE EMEA Offsite 2026.",
+  "theme_color": "#1761A0",
+  "background_color": "#FFFFFF",
+  "display": "standalone",
+  "scope": "./",
+  "start_url": "./",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./favicon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
