@@ -1,6 +1,8 @@
-import { HAIRLINE, MUTED } from "../theme";
+import { useStore } from "../store";
+import { BAYERN, HAIRLINE, MUTED } from "../theme";
 
 export function Footer() {
+  const { setTab } = useStore();
   return (
     <footer className="border-t" style={{ borderColor: HAIRLINE }}>
       <div
@@ -10,9 +12,16 @@ export function Footer() {
         <p className="text-[12px] tracking-tight">
           CxE EMEA Offsite 2026 · Step Tracker · München
         </p>
-        <p className="text-[12px] tracking-tight">
-          Data stored locally in your browser.
-        </p>
+        <div className="flex items-center gap-5 text-[12px] tracking-tight">
+          <button
+            onClick={() => setTab("about")}
+            className="hover:underline"
+            style={{ color: BAYERN }}
+          >
+            About &amp; FAQ
+          </button>
+          <span>Data stored locally in your browser.</span>
+        </div>
       </div>
     </footer>
   );

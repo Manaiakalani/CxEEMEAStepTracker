@@ -3,6 +3,7 @@ import {
   Trophy,
   Users,
   User as UserIcon,
+  Info,
   Sun,
   Moon,
 } from "lucide-react";
@@ -14,6 +15,7 @@ const ITEMS: { key: TabKey; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "leaderboard", label: "Leaderboard", icon: Trophy },
   { key: "teams", label: "Teams", icon: Users },
   { key: "profile", label: "Profile", icon: UserIcon },
+  { key: "about", label: "About", icon: Info },
 ];
 
 export function TopNav() {

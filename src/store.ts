@@ -11,7 +11,12 @@ import { createElement } from "react";
 import { isoDate, lastNDays } from "./lib/format";
 import { SEED_PRIOR_DAYS, TEAMS } from "./data";
 
-export type TabKey = "dashboard" | "leaderboard" | "teams" | "profile";
+export type TabKey =
+  | "dashboard"
+  | "leaderboard"
+  | "teams"
+  | "profile"
+  | "about";
 export type ThemeMode = "light" | "dark";
 
 export type ActivityEntry = {

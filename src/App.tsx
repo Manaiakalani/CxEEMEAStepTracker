@@ -5,6 +5,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { TeamsPage } from "./pages/TeamsPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { AboutPage } from "./pages/AboutPage";
 
 function Routed() {
   const { tab } = useStore();
@@ -15,6 +16,8 @@ function Routed() {
       return <TeamsPage />;
     case "profile":
       return <ProfilePage />;
+    case "about":
+      return <AboutPage />;
     case "dashboard":
     default:
       return <DashboardPage />;

@@ -71,9 +71,28 @@ src/
 └── pages/                  # Dashboard, Leaderboard, Teams, Profile
 ```
 
-## 💾 Data & Privacy
+## 💾 Data & Privacy (GDPR-friendly)
 
-All step entries, profile info, and activity history live exclusively in your browser under the `alpine-step-tracker:v1` `localStorage` key. Clearing your browser data resets the app. Nothing is sent to a server.
+This is a **local-first** application. Everything you enter — display name,
+team, daily goal, and step counts — is stored exclusively in your browser's
+`localStorage` under the `alpine-step-tracker:v1` key. Nothing is transmitted
+to a server, no analytics or cookies are used, and no third-party trackers
+are loaded.
+
+Because no personal data ever leaves your device, this app does not act as a
+"controller" or "processor" of personal data under the GDPR — you remain in
+full control of your own data at all times.
+
+- **Right to erasure:** the Profile screen offers "Reset week" and "Reset all
+  data" controls; clearing the site's storage in your browser also wipes
+  everything immediately.
+- **Minimal data:** only a display name, a team selection, and step counts.
+  No email, location, or device identifiers.
+- **Third parties:** the only external resource loaded is the Inter typeface
+  from Google Fonts. The site itself is served from GitHub Pages.
+
+A more detailed write-up — privacy notice, Munich theme days, suggested
+routes, and an FAQ — is available inside the app on the **About** tab.
 
 ## 🤝 Contributing
 

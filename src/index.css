@@ -119,6 +119,36 @@ input {
   );
 }
 
+/* About page prose: gentle defaults inside a single container so the
+   reset-stripped <ul>, <strong>, and <code> render readably. */
+.about-prose ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.about-prose ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+}
+.about-prose strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.about-prose code {
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: var(--color-bayern-soft);
+  color: var(--color-bayern);
+}
+.about-prose a:hover {
+  filter: brightness(1.1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
