@@ -137,6 +137,23 @@ function isValidActivity(a: unknown): a is ActivityEntry[] {
   });
 }
 
+/**
+ * Returns true if the entries map looks like an untouched fresh-install
+ * seed: today is 0, and the prior 6 days hold the exact SEED_PRIOR_DAYS
+ * values in order. Used as a one-time migration guard so old installs
+ * don't keep pushing demo data to Firestore.
+ */
+function looksLikeUntouchedSeed(entries: Record<string, number>): boolean {
+  const days = lastNDays(7);
+  const today = isoDate(days[days.length - 1]);
+  if ((entries[today] ?? 0) !== 0) return false;
+  for (let i = 0; i < 6; i++) {
+    const k = isoDate(days[i]);
+    if (entries[k] !== SEED_PRIOR_DAYS[i]) return false;
+  }
+  return true;
+}
+
 function loadInitial(): Persisted {
   if (typeof window === "undefined") return buildInitial();
   try {
@@ -167,6 +184,20 @@ function loadInitial(): Persisted {
       onboarded:
         typeof parsed.onboarded === "boolean" ? parsed.onboarded : true,
     };
+    // Migration safety net: if a save predates the onboarding gate AND its
+    // entries match the seed prior-day pattern exactly, the user installed
+    // but never actually walked. Zero out the seed values so they don't
+    // re-pollute Firestore on the next sync. We deliberately only run this
+    // when `onboarded` was missing (i.e. an older save) and the values
+    // match the SEED_PRIOR_DAYS sequence — narrow enough to never touch
+    // legitimate activity.
+    if (typeof parsed.onboarded !== "boolean" && looksLikeUntouchedSeed(safe.entries)) {
+      const days = lastNDays(7);
+      const cleaned: Record<string, number> = {};
+      for (const d of days) cleaned[isoDate(d)] = 0;
+      safe.entries = cleaned;
+      safe.activity = [];
+    }
     // Make sure today's key exists (rolls naturally each new day).
     const today = isoDate(new Date());
     if (safe.entries[today] === undefined) {
@@ -333,15 +364,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const completeOnboarding = useCallback((p: Profile) => {
-    setState((prev) => ({
-      ...prev,
-      profile: {
-        name: p.name.trim() || prev.profile.name,
-        team: p.team || prev.profile.team,
-        goal: Math.max(1000, Math.round(p.goal)),
-      },
-      onboarded: true,
-    }));
+    setState((prev) => {
+      // Zero out the seed prior-day entries — they're a UX device for the
+      // pre-onboarding dashboard ("lived in" feel), not real activity. The
+      // user's real numbers start now. This also guarantees Total Stomp
+      // reflects only real walking, never demo data.
+      const cleanEntries: Record<string, number> = {};
+      for (const d of lastNDays(7)) {
+        cleanEntries[isoDate(d)] = 0;
+      }
+      return {
+        ...prev,
+        profile: {
+          name: p.name.trim() || prev.profile.name,
+          team: p.team || prev.profile.team,
+          goal: Math.max(1000, Math.round(p.goal)),
+        },
+        entries: cleanEntries,
+        activity: [],
+        onboarded: true,
+      };
+    });
   }, []);
 
   // Cloud sync: always on when Firebase is configured. We track auth via
@@ -401,8 +444,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // the local IndexedDB instantly and are flushed to the server on the next
   // reconnect — so we always attempt the push and let the SDK figure out
   // delivery. Status is derived from `navigator.onLine`.
+  //
+  // Gated on `state.onboarded` so a fresh install's seed/demo profile +
+  // lived-in prior-day entries never reach the cloud — Total Stomp would
+  // otherwise be inflated by ~48k steps per first-time visitor before they
+  // actually walk. Existing v1 saves migrate to onboarded:true on load, so
+  // current users continue to sync as before.
   useEffect(() => {
     if (!isFirebaseConfigured()) return;
+    if (!state.onboarded) return;
     let cancelled = false;
     const timer = window.setTimeout(async () => {
       let uid = cloudUidRef.current;
@@ -431,7 +481,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [state.profile, state.entries]);
+  }, [state.profile, state.entries, state.onboarded]);
 
   // Subscribe to the live leaderboard collection. Mount-once: the snapshot
   // listener stays open for the lifetime of the provider and keeps `walkers`
