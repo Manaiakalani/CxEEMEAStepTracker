@@ -54,8 +54,10 @@ export function Leaderboard({
   const max = teams[0]?.steps ?? 1;
   const list = teams.slice(0, limit);
   const leader = teams[0];
-  const headline =
-    leader?.name === profile.team
+  const hasSteps = (leader?.steps ?? 0) > 0;
+  const headline = !hasSteps
+    ? "Standings open at the first step."
+    : leader?.name === profile.team
       ? `${profile.team} leads the offsite.`
       : `${leader?.name} leads the offsite.`;
 

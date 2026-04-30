@@ -93,8 +93,9 @@ export function TopNav() {
               <li key={it.key}>
                 <button
                   onClick={() => setTab(it.key)}
-                  className="relative h-14 px-3 sm:px-4 inline-flex items-center gap-2 text-[13px] font-medium tracking-tight transition-colors focus:outline-none focus-surface"
+                  className="relative h-14 min-w-11 px-3 sm:px-4 inline-flex items-center justify-center gap-2 text-[13px] font-medium tracking-tight transition-colors focus:outline-none focus-surface"
                   style={{ color: active ? INK : MUTED }}
+                  aria-label={it.label}
                   aria-current={active ? "page" : undefined}
                 >
                   <Icon className="w-4 h-4" strokeWidth={1.5} />

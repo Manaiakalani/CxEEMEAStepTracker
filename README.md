@@ -1,5 +1,10 @@
 # CxE EMEA Step Tracker
 
+[![Azure Static Web Apps CI/CD](https://github.com/Manaiakalani/CxEEMEAStepTracker/actions/workflows/azure-static-web-apps-gentle-cliff-07e205d03.yml/badge.svg)](https://github.com/Manaiakalani/CxEEMEAStepTracker/actions/workflows/azure-static-web-apps-gentle-cliff-07e205d03.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-1761A0.svg)](./LICENSE)
+
+🔗 **Live:** <https://gentle-cliff-07e205d03.7.azurestaticapps.net>
+
 A lightweight, Munich-themed step-tracking web app for the **CxE EMEA Offsite 2026**, running **11–14 May 2026** at the **Microsoft München office** (Walter-Gropius-Straße, Schwabing). Log your steps, climb landmark-inspired challenges, race your teammates on the leaderboard, and keep the offsite spirit alive between sessions.
 
 > _"Match Munich's twin onion-domed towers, 98 m tall, watching over the Altstadt since 1488."_
@@ -15,11 +20,20 @@ A lightweight, Munich-themed step-tracking web app for the **CxE EMEA Offsite 20
 
 ## 🛠 Tech Stack
 
-- [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- [Vite 7](https://vitejs.dev/) for dev/build
+- [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) (lazy-routed tabs via `React.lazy` + `Suspense`)
+- [Vite 7](https://vitejs.dev/) for dev/build (manual chunks for `firebase` + `react`)
 - [Tailwind CSS 4](https://tailwindcss.com/) (via `@tailwindcss/vite`)
+- [Firebase 12](https://firebase.google.com/) — Anonymous Auth + Firestore (EU `eur3`), persistent IndexedDB cache
 - [lucide-react](https://lucide.dev/) icons
+- [Azure Static Web Apps](https://azure.microsoft.com/products/app-service/static) for hosting + CI/CD
 - React Context + `localStorage` for state persistence
+
+## 🎨 Design
+
+The full design system — color tokens (incl. dark theme), typography ramps,
+spacing, motion, elevation, and component recipes — lives in
+[`DESIGN.md`](./DESIGN.md). It is fully self-contained and can be lifted
+into any other project that wants the same visual language.
 
 ## 🚀 Getting Started
 
