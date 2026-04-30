@@ -12,7 +12,13 @@ import { createElement } from "react";
 import { isoDate, lastNDays } from "./lib/format";
 import { SEED_PRIOR_DAYS, TEAMS } from "./data";
 import { isFirebaseConfigured } from "./firebase-config";
-import { ensureAnonUser, onAuthChange, pushUserSnapshot } from "./lib/cloud-sync";
+import {
+  ensureAnonUser,
+  onAuthChange,
+  pushUserSnapshot,
+  subscribeLeaderboard,
+  type LeaderboardEntry,
+} from "./lib/cloud-sync";
 
 export type TabKey =
   | "dashboard"
@@ -188,6 +194,8 @@ type StoreValue = {
   todaySteps: number;
   theme: ThemeMode;
   cloudStatus: CloudStatus;
+  cloudUid: string | null;
+  walkers: LeaderboardEntry[];
   setTab: (t: TabKey) => void;
   addSteps: (amount: number, source?: "manual" | "quick") => void;
   setProfile: (p: Partial<Profile>) => void;
@@ -210,6 +218,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         : "connecting"
       : "unconfigured",
   );
+  const [cloudUid, setCloudUid] = useState<string | null>(null);
+  const [walkers, setWalkers] = useState<LeaderboardEntry[]>([]);
   const cloudUidRef = useRef<string | null>(null);
   const onlineRef = useRef<boolean>(
     typeof navigator === "undefined" ? true : navigator.onLine,
@@ -334,6 +344,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const unsubAuth = onAuthChange((user) => {
       if (user) {
         cloudUidRef.current = user.uid;
+        setCloudUid(user.uid);
         setCloudStatus(onlineRef.current ? "synced" : "offline");
       } else {
         // No cached user — kick off an anonymous sign-in. While offline this
@@ -343,6 +354,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           const uid = await ensureAnonUser();
           if (uid) {
             cloudUidRef.current = uid;
+            setCloudUid(uid);
             setCloudStatus(onlineRef.current ? "synced" : "offline");
           } else {
             setCloudStatus(onlineRef.current ? "error" : "offline");
@@ -395,6 +407,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, [state.profile, state.entries]);
 
+  // Subscribe to the live leaderboard collection. Mount-once: the snapshot
+  // listener stays open for the lifetime of the provider and keeps `walkers`
+  // fresh in real time. Firestore's persistent cache also serves cached
+  // results instantly while offline.
+  useEffect(() => {
+    if (!isFirebaseConfigured()) return;
+    const unsub = subscribeLeaderboard((rows) => setWalkers(rows));
+    return () => unsub();
+  }, []);
+
   const todaySteps = state.entries[todayKey] ?? 0;
 
   const value = useMemo<StoreValue>(
@@ -407,6 +429,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       todaySteps,
       theme,
       cloudStatus,
+      cloudUid,
+      walkers,
       setTab,
       addSteps,
       setProfile,
@@ -422,6 +446,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       todaySteps,
       theme,
       cloudStatus,
+      cloudUid,
+      walkers,
       addSteps,
       setProfile,
       toggleTheme,
@@ -443,6 +469,66 @@ export function useStore(): StoreValue {
 export function weekTotalFor(entries: Record<string, number>): number {
   const days = lastNDays(7);
   return days.reduce((sum, d) => sum + (entries[isoDate(d)] ?? 0), 0);
+}
+
+/** Per-walker leaderboard row — what UI components consume. */
+export type WalkerRow = {
+  uid: string;
+  name: string;
+  team: string;
+  steps: number;
+  mine: boolean;
+};
+
+/**
+ * Compute the per-walker leaderboard from the live Firestore collection.
+ * Walkers without a name (haven't customised their profile yet) are filtered
+ * out so they don't crowd the offsite leaderboard with anonymous rows.
+ *
+ * The current user is **always** included even if Firestore hasn't echoed
+ * their snapshot back yet (network races on first load) — we synthesise a
+ * row from local state so they immediately see themselves on the board.
+ */
+export function walkerLeaderboard(
+  walkers: LeaderboardEntry[],
+  myUid: string | null,
+  myName: string,
+  myTeam: string,
+  myEntries: Record<string, number>,
+): WalkerRow[] {
+  const rows: WalkerRow[] = [];
+  let sawSelf = false;
+  for (const w of walkers) {
+    const trimmed = (w.name ?? "").trim();
+    if (!trimmed) continue;
+    const mine = !!myUid && w.uid === myUid;
+    if (mine) sawSelf = true;
+    rows.push({
+      uid: w.uid,
+      name: trimmed,
+      team: w.team,
+      // Prefer locally-known entries for `mine` so the count is up-to-date
+      // even before the debounced sync round-trips.
+      steps: weekTotalFor(mine ? myEntries : w.entries),
+      mine,
+    });
+  }
+  if (myUid && !sawSelf && myName.trim()) {
+    rows.push({
+      uid: myUid,
+      name: myName,
+      team: myTeam,
+      steps: weekTotalFor(myEntries),
+      mine: true,
+    });
+  }
+  rows.sort((a, b) => b.steps - a.steps);
+  return rows;
+}
+
+/** Sum of every walker's weekly steps — the "Total Stomp" headline metric. */
+export function totalStomp(rows: WalkerRow[]): number {
+  return rows.reduce((sum, r) => sum + r.steps, 0);
 }
 
 export function leaderboardWith(

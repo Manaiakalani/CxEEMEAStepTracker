@@ -1,4 +1,6 @@
 import { Leaderboard } from "../components/Leaderboard";
+import { TopStomp } from "../components/TopStomp";
+import { WalkersLeaderboard } from "../components/WalkersLeaderboard";
 import { TEAMS } from "../data";
 import { HAIRLINE, INK, MUTED } from "../theme";
 
@@ -17,18 +19,20 @@ export function LeaderboardPage() {
             className="text-[36px] sm:text-[44px] leading-[1.05] font-semibold tracking-tight"
             style={{ color: INK }}
           >
-            All {TEAMS.length} CxE teams.
+            All {TEAMS.length} CxE teams · every walker.
           </h1>
           <p
             className="text-[15px] mt-3 max-w-md"
             style={{ color: MUTED }}
           >
             Step totals refresh as the offsite progresses. Your contribution
-            updates your team in real time.
+            updates your team and your row in real time.
           </p>
         </div>
       </header>
+      <TopStomp />
       <Leaderboard limit={TEAMS.length} />
+      <WalkersLeaderboard />
     </>
   );
 }
