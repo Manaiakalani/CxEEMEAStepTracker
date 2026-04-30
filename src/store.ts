@@ -23,7 +23,6 @@ import {
 export type TabKey =
   | "dashboard"
   | "leaderboard"
-  | "teams"
   | "profile"
   | "about";
 export type ThemeMode = "light" | "dark";

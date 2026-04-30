@@ -3,7 +3,6 @@ import { TopNav } from "./components/TopNav";
 import { Footer } from "./components/Footer";
 import { DashboardPage } from "./pages/DashboardPage";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
-import { TeamsPage } from "./pages/TeamsPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { AboutPage } from "./pages/AboutPage";
 
@@ -12,8 +11,6 @@ function Routed() {
   switch (tab) {
     case "leaderboard":
       return <LeaderboardPage />;
-    case "teams":
-      return <TeamsPage />;
     case "profile":
       return <ProfilePage />;
     case "about":

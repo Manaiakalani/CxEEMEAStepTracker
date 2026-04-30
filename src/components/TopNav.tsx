@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Trophy,
-  Users,
   User as UserIcon,
   Info,
   Sun,
@@ -13,7 +12,6 @@ import { BAYERN, HAIRLINE, INK, MUTED } from "../theme";
 const ITEMS: { key: TabKey; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "leaderboard", label: "Leaderboard", icon: Trophy },
-  { key: "teams", label: "Teams", icon: Users },
   { key: "profile", label: "Profile", icon: UserIcon },
   { key: "about", label: "About", icon: Info },
 ];

@@ -217,8 +217,8 @@ const SECTIONS: Section[] = [
           </dt>
           <dd className="mt-1">
             Yes — the Leaderboard reflects everyone who's signed in via the
-            shared Firestore project, in real time. The Teams view aggregates
-            those numbers per team. Only display name, team, and step counts
+            shared Firestore project, in real time. It aggregates those numbers
+            per team and per walker. Only display name, team, and step counts
             are shared.
           </dd>
         </div>

@@ -1,7 +1,19 @@
 import { useState } from "react";
-import { useStore, weekTotalFor, type CloudStatus } from "../store";
-import { TEAMS } from "../data";
-import { BAYERN, HAIRLINE, INK, MUTED } from "../theme";
+import { Check, Users } from "lucide-react";
+import {
+  useStore,
+  weekTotalFor,
+  leaderboardWith,
+  type CloudStatus,
+} from "../store";
+import {
+  BAYERN,
+  BAYERN_SOFT,
+  HAIRLINE,
+  INK,
+  MUTED,
+  SURFACE,
+} from "../theme";
 import { formatNumber } from "../lib/format";
 import { isFirebaseConfigured } from "../firebase-config";
 
@@ -21,6 +33,7 @@ export function ProfilePage() {
   const [confirmReset, setConfirmReset] = useState<"none" | "week" | "all">(
     "none",
   );
+  const teams = leaderboardWith(entries, team);
 
   function save() {
     const goalNum = Math.max(1000, Number(goal.replace(/[^\d]/g, "")) || 8000);
@@ -93,20 +106,6 @@ export function ProfilePage() {
                   style={{ borderColor: HAIRLINE, color: INK }}
                 />
               </Field>
-              <Field label="Team" className="sm:col-span-2">
-                <select
-                  value={team}
-                  onChange={(e) => setTeam(e.target.value)}
-                  className="w-full h-11 bg-transparent border-0 border-b text-[16px] font-medium focus:outline-none focus:border-b-2"
-                  style={{ borderColor: HAIRLINE, color: INK }}
-                >
-                  {TEAMS.map((t) => (
-                    <option key={t.id} value={t.name}>
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
-              </Field>
             </div>
             <div className="mt-8 flex items-center gap-4 flex-wrap">
               <button
@@ -127,6 +126,98 @@ export function ProfilePage() {
                 Saved.
               </span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b" style={{ borderColor: HAIRLINE }}>
+        <div className="max-w-[1200px] mx-auto px-6 sm:px-10 py-12 grid grid-cols-12 gap-8">
+          <div className="col-span-12 md:col-span-4">
+            <p
+              className="text-[12px] uppercase tracking-[0.18em] mb-3"
+              style={{ color: MUTED }}
+            >
+              Team
+            </p>
+            <h2
+              className="text-[22px] font-medium tracking-tight"
+              style={{ color: INK }}
+            >
+              Pick your team.
+            </h2>
+            <p className="text-[13.5px] mt-1" style={{ color: MUTED }}>
+              Your steps add to your team's offsite total. Switch any time —
+              we'll move your contribution.
+            </p>
+          </div>
+          <div className="col-span-12 md:col-span-8">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {teams.map((t) => {
+                const isMine = t.name === team;
+                return (
+                  <li key={t.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTeam(t.name);
+                        setProfile({ team: t.name });
+                        setSavedAt(Date.now());
+                        window.setTimeout(() => setSavedAt(null), 2000);
+                      }}
+                      className="w-full text-left p-5 rounded-lg border transition-all hover:border-[color:var(--bayern)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                      style={{
+                        borderColor: isMine ? BAYERN : HAIRLINE,
+                        background: isMine ? BAYERN_SOFT : SURFACE,
+                        ["--bayern" as any]: BAYERN,
+                        ["--tw-ring-color" as any]: BAYERN,
+                      }}
+                      aria-pressed={isMine}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p
+                            className="text-[16px] font-medium tracking-tight"
+                            style={{ color: INK }}
+                          >
+                            {t.name}
+                          </p>
+                          <p
+                            className="text-[12px] mt-1 inline-flex items-center gap-1"
+                            style={{ color: MUTED }}
+                          >
+                            <Users className="w-3 h-3" strokeWidth={1.75} />
+                            {t.members} walkers
+                          </p>
+                        </div>
+                        {isMine && (
+                          <span
+                            className="w-6 h-6 rounded-full inline-flex items-center justify-center"
+                            style={{ background: BAYERN, color: "#fff" }}
+                            aria-hidden
+                          >
+                            <Check className="w-3.5 h-3.5" strokeWidth={2.25} />
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-5 flex items-baseline gap-2">
+                        <span
+                          className="text-[24px] font-semibold tracking-tight tabular-nums"
+                          style={{ color: INK }}
+                        >
+                          {formatNumber(t.steps)}
+                        </span>
+                        <span
+                          className="text-[12px]"
+                          style={{ color: MUTED }}
+                        >
+                          steps this week
+                        </span>
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         </div>
       </section>
