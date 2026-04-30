@@ -1,4 +1,9 @@
-import { useStore, leaderboardWith } from "../store";
+import { useMemo } from "react";
+import {
+  useStore,
+  leaderboardWith,
+  walkerLeaderboard,
+} from "../store";
 import {
   BAR_REST,
   BAYERN,
@@ -30,8 +35,22 @@ export function Leaderboard({
   showAllToggle?: boolean;
   onSeeAll?: () => void;
 }) {
-  const { entries, profile } = useStore();
-  const teams = leaderboardWith(entries, profile.team);
+  const { entries, profile, walkers, cloudUid } = useStore();
+  const walkerRows = useMemo(
+    () =>
+      walkerLeaderboard(
+        walkers,
+        cloudUid,
+        profile.name,
+        profile.team,
+        entries,
+      ),
+    [walkers, cloudUid, profile.name, profile.team, entries],
+  );
+  const teams = useMemo(
+    () => leaderboardWith(walkerRows, profile.team),
+    [walkerRows, profile.team],
+  );
   const max = teams[0]?.steps ?? 1;
   const list = teams.slice(0, limit);
   const leader = teams[0];
@@ -126,7 +145,7 @@ export function Leaderboard({
                     className="text-[12px] mt-0.5"
                     style={{ color: MUTED }}
                   >
-                    {t.members} walkers
+                    {t.members} {t.members === 1 ? "walker" : "walkers"}
                   </p>
                 </div>
                 <div className="col-span-8 sm:col-span-5">

@@ -656,14 +656,40 @@ export function totalStomp(rows: WalkerRow[]): number {
   return rows.reduce((sum, r) => sum + r.steps, 0);
 }
 
+/**
+ * Compute the per-team standings from the deduped walker rows.
+ *
+ * Step totals and walker counts are derived live: every walker whose
+ * `team` matches one of the canonical TEAMS names contributes their
+ * weekly steps to that team's total and adds 1 to its walker count.
+ * Team matching is case- and whitespace-insensitive to absorb minor
+ * drift in stored values.
+ *
+ * The returned `members` field is the **live walker count** (not the
+ * old static headcount estimate), so the UI label "N walkers" reflects
+ * who has actually registered.
+ */
 export function leaderboardWith(
-  entries: Record<string, number>,
+  walkerRows: WalkerRow[],
   myTeamName: string,
 ) {
-  const myWeek = weekTotalFor(entries);
-  return TEAMS.map((t) => ({
-    ...t,
-    mine: t.name === myTeamName,
-    steps: t.name === myTeamName ? t.baseSteps + myWeek : t.baseSteps,
-  })).sort((a, b) => b.steps - a.steps);
+  const agg = new Map<string, { steps: number; walkers: number }>();
+  for (const w of walkerRows) {
+    const key = (w.team ?? "").trim().toLowerCase();
+    if (!key) continue;
+    const cur = agg.get(key) ?? { steps: 0, walkers: 0 };
+    cur.steps += w.steps;
+    cur.walkers += 1;
+    agg.set(key, cur);
+  }
+  return TEAMS.map((t) => {
+    const a = agg.get(t.name.toLowerCase()) ?? { steps: 0, walkers: 0 };
+    return {
+      id: t.id,
+      name: t.name,
+      mine: t.name === myTeamName,
+      steps: a.steps,
+      members: a.walkers,
+    };
+  }).sort((a, b) => b.steps - a.steps);
 }

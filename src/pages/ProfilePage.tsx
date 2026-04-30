@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Check, Users } from "lucide-react";
 import {
   useStore,
   weekTotalFor,
   leaderboardWith,
+  walkerLeaderboard,
   type CloudStatus,
 } from "../store";
 import {
@@ -25,6 +26,8 @@ export function ProfilePage() {
     resetWeek,
     resetAll,
     cloudStatus,
+    walkers,
+    cloudUid,
   } = useStore();
   const [name, setName] = useState(profile.name);
   const [goal, setGoal] = useState(String(profile.goal));
@@ -33,7 +36,21 @@ export function ProfilePage() {
   const [confirmReset, setConfirmReset] = useState<"none" | "week" | "all">(
     "none",
   );
-  const teams = leaderboardWith(entries, team);
+  const walkerRows = useMemo(
+    () =>
+      walkerLeaderboard(
+        walkers,
+        cloudUid,
+        profile.name,
+        profile.team,
+        entries,
+      ),
+    [walkers, cloudUid, profile.name, profile.team, entries],
+  );
+  const teams = useMemo(
+    () => leaderboardWith(walkerRows, team),
+    [walkerRows, team],
+  );
 
   function save() {
     const goalNum = Math.max(1000, Number(goal.replace(/[^\d]/g, "")) || 8000);
@@ -186,7 +203,8 @@ export function ProfilePage() {
                             style={{ color: MUTED }}
                           >
                             <Users className="w-3 h-3" strokeWidth={1.75} />
-                            {t.members} walkers
+                            {t.members}{" "}
+                            {t.members === 1 ? "walker" : "walkers"}
                           </p>
                         </div>
                         {isMine && (

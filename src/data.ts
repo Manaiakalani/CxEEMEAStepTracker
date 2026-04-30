@@ -80,33 +80,24 @@ export const CHALLENGES: ChallengeDef[] = [
 export type SeedTeam = {
   id: string;
   name: string;
-  members: number;
-  /**
-   * Base offsite-week step total before adding walkers' contributions.
-   * For the live event this is `0` for every team — totals build up
-   * organically from real walker submissions via the Firestore leaderboard
-   * subscription. The `members` count below is the expected team headcount
-   * (informational), not the number of registered walkers.
-   */
-  baseSteps: number;
 };
 
 /**
- * The 9 CxE teams. Step totals start at `0` for the event and grow from
- * real walker activity. Member counts are the expected team headcounts and
- * are displayed for context only — the actual walker count per team comes
- * from the live Firestore leaderboard.
+ * The 9 CxE teams. The canonical list of names + ids used to map team
+ * picks in the UI to live aggregated rows in the leaderboard. Step
+ * totals and walker counts are derived live from registered walkers
+ * (see `leaderboardWith` in store.ts), not stored statically here.
  */
 export const TEAMS: SeedTeam[] = [
-  { id: "threat-protection", name: "Threat Protection", members: 14, baseSteps: 0 },
-  { id: "purview-ces", name: "Purview / CES", members: 12, baseSteps: 0 },
-  { id: "idna", name: "IDNA", members: 10, baseSteps: 0 },
-  { id: "care", name: "CARE", members: 11, baseSteps: 0 },
-  { id: "scale-enablement", name: "Scale Enablement", members: 9, baseSteps: 0 },
-  { id: "ccp", name: "CCP", members: 8, baseSteps: 0 },
-  { id: "cxe-lt", name: "CxE LT", members: 6, baseSteps: 0 },
-  { id: "shared-services", name: "Shared Services", members: 13, baseSteps: 0 },
-  { id: "management", name: "Management", members: 5, baseSteps: 0 },
+  { id: "threat-protection", name: "Threat Protection" },
+  { id: "purview-ces", name: "Purview / CES" },
+  { id: "idna", name: "IDNA" },
+  { id: "care", name: "CARE" },
+  { id: "scale-enablement", name: "Scale Enablement" },
+  { id: "ccp", name: "CCP" },
+  { id: "cxe-lt", name: "CxE LT" },
+  { id: "shared-services", name: "Shared Services" },
+  { id: "management", name: "Management" },
 ];
 
 /**

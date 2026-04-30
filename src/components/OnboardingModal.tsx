@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Footprints, Users, ArrowRight, X } from "lucide-react";
-import { useStore } from "../store";
+import {
+  useStore,
+  walkerLeaderboard,
+  leaderboardWith,
+} from "../store";
 import { TEAMS } from "../data";
 import {
   ALPENGLOW,
@@ -30,13 +34,28 @@ type Step = "name" | "team" | "goal";
  * completeOnboarding() so this modal never reappears for this device.
  */
 export function OnboardingModal() {
-  const { onboarded, profile, walkers, completeOnboarding } = useStore();
+  const { onboarded, profile, walkers, cloudUid, entries, completeOnboarding } =
+    useStore();
   const [open, setOpen] = useState<boolean>(!onboarded);
   const [step, setStep] = useState<Step>("name");
   const [name, setName] = useState("");
   const [team, setTeam] = useState<string>("");
   const [goal, setGoal] = useState<number>(8000);
   const nameInputRef = useRef<HTMLInputElement>(null);
+
+  const teamCounts = useMemo(() => {
+    const rows = walkerLeaderboard(
+      walkers,
+      cloudUid,
+      profile.name,
+      profile.team,
+      entries,
+    );
+    const teamRows = leaderboardWith(rows, team);
+    const map = new Map<string, number>();
+    for (const t of teamRows) map.set(t.id, t.members);
+    return map;
+  }, [walkers, cloudUid, profile.name, profile.team, entries, team]);
 
   // If the persisted state finishes loading and the user is already
   // onboarded (existing v1 save), close the modal silently.
@@ -305,7 +324,10 @@ export function OnboardingModal() {
                               style={{ color: MUTED }}
                             >
                               <Users className="w-3 h-3" strokeWidth={1.75} />
-                              {t.members} walkers
+                              {teamCounts.get(t.id) ?? 0}{" "}
+                              {(teamCounts.get(t.id) ?? 0) === 1
+                                ? "walker"
+                                : "walkers"}
                             </span>
                           </span>
                           {isMine && (
