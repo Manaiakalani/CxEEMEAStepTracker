@@ -8,9 +8,8 @@ A lightweight, Munich-themed step-tracking web app for the **CxE EMEA Offsite 20
 
 - **Dashboard** — daily progress ring, goal tracking, weekly chart, today's focus, and quick-entry buttons.
 - **Challenges** — Munich landmark-inspired step goals (Frauenkirche, Viktualienmarkt, Englischer Garten, Isar, Marienplatz, Microsoft München Mile, and more).
-- **Leaderboard** — see how you stack up against fellow attendees.
-- **Teams** — team-by-team breakdown for friendly inter-team competition.
-- **Profile** — set your name, team, and personal daily goal.
+- **Leaderboard** — team standings _and_ a per-walker view, with a Top Stomp roll-up that aggregates every registered walker.
+- **Profile** — set your name, team, and personal daily goal; switch teams any time.
 - **Always-on cloud sync** — your steps mirror automatically to the shared offsite Firestore project (EU region) for a real-time leaderboard, with offline fallback so nothing is lost when Wi-Fi drops.
 - **Responsive & themed** — Inter typeface, alpine palette, custom mountain silhouette, and a `#1761A0` brand accent.
 
@@ -61,14 +60,16 @@ npm run typecheck
 
 ```
 src/
-├── App.tsx                 # Root + tab-based router
+├── App.tsx                 # Root + lazy-routed tabs (Suspense)
 ├── main.tsx                # Vite entry
 ├── store.ts                # React context + localStorage persistence
 ├── data.ts                 # Challenges, teams, seed data
 ├── theme.ts                # Brand colors / tokens
-├── lib/format.ts           # Date + number helpers
+├── lib/
+│   ├── format.ts           # Date + number helpers
+│   └── cloud-sync.ts       # Firebase Auth + Firestore (EU)
 ├── components/             # UI building blocks (TopNav, Hero, Leaderboard, …)
-└── pages/                  # Dashboard, Leaderboard, Teams, Profile
+└── pages/                  # Dashboard, Leaderboard, Profile, About
 ```
 
 ## 💾 Data & Privacy (GDPR-friendly)
@@ -103,18 +104,27 @@ available inside the app on the **About** tab.
 
 Cloud sync is **always on** when the app is configured. The Firebase
 project (`cxeemeastep`, EU region) is wired in at build time via
-`src/firebase-config.ts`. The Firestore SDK uses an IndexedDB-backed
-persistent local cache, so writes succeed instantly even offline and are
-flushed to the server automatically once connectivity returns. The
-**Profile → Cloud sync** panel surfaces the current state (Synced / Offline
-— saving locally / Connecting…).
+`src/firebase-config.ts`, with the `VITE_FIREBASE_*` values injected by
+the Azure Static Web Apps workflow from repo secrets. The Firestore SDK
+uses an IndexedDB-backed persistent local cache, so writes succeed
+instantly even offline and are flushed to the server automatically once
+connectivity returns. The **Profile → Cloud sync** panel surfaces the
+current state (Synced / Offline — saving locally / Connecting…).
 
 If `firebase-config.ts` is left empty in a fork, the app falls back to a
 purely local experience — no Firebase code talks to the network.
 
+## 🚢 Hosting
+
+Production hosts on **Azure Static Web Apps** at
+<https://gentle-cliff-07e205d03.7.azurestaticapps.net>. Every push to
+`main` triggers `.github/workflows/azure-static-web-apps-*.yml`, which
+runs `npm run build` (Oryx) and ships the `dist/` output. SPA fallback
+and asset cache headers live in `staticwebapp.config.json`.
+
 Repo owners: see [`docs/firebase-setup.md`](./docs/firebase-setup.md) for
-the one-time Firebase Console setup, the security rules, and how to deploy
-them.
+the one-time Firebase Console setup, the security rules, and the API key
+referrer allowlist.
 
 ## 🤝 Contributing
 

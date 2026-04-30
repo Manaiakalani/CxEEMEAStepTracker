@@ -125,6 +125,15 @@ body {
   padding-right: env(safe-area-inset-right);
 }
 
+/* Skip rendering of off-screen About sections — the browser still
+   reserves vertical space (contain-intrinsic-size) so the scrollbar is
+   stable, but the layout/paint cost is deferred until the section is
+   near the viewport. Big win on the long About page on mobile. */
+.about-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 600px;
+}
+
 /* Theme-aware utility classes -------------------------------------------- */
 
 .surface {

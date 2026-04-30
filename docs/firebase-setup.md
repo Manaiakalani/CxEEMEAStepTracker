@@ -57,11 +57,12 @@ enforced without anyone making accounts.
    VITE_FIREBASE_MEASUREMENT_ID=G-…
    ```
 
-   **For GitHub Pages CI** — open
+   **For Azure Static Web Apps CI** — open
    **Repo → Settings → Secrets and variables → Actions → New repository
    secret** and add each variable above as a separate secret with the same
-   name. The `.github/workflows/deploy.yml` workflow injects them into the
-   Vite build.
+   name. The `.github/workflows/azure-static-web-apps-*.yml` workflow
+   passes them into the Oryx-driven Vite build via the deploy step's
+   `env:` block.
 
 4. Once `VITE_FIREBASE_API_KEY` and `VITE_FIREBASE_APP_ID` are present at
    build time, `isFirebaseConfigured()` returns `true` and cloud sync runs
@@ -80,13 +81,14 @@ for forks. Keep them in env vars and lock them down at the platform layer:
   [Google Cloud Console → APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials?project=cxeemeastep),
   open the Firebase browser key and set **Application restrictions →
   Websites** to:
-  - `https://manaiakalani.github.io/*` ← **required** (browsers send the
-    bare origin as `Referer` due to the default
-    `strict-origin-when-cross-origin` policy, so a narrower pattern like
-    `https://manaiakalani.github.io/CxEEMEAStepTracker/*` will reject every
-    real browser request with HTTP 403)
-  - `https://manaiakalani.github.io` (some browsers send Referer with no
-    trailing slash)
+  - `https://gentle-cliff-07e205d03.7.azurestaticapps.net/*` ← **required**
+    (browsers send the bare origin as `Referer` due to the default
+    `strict-origin-when-cross-origin` policy, so a narrower path-scoped
+    pattern would reject every real browser request with HTTP 403)
+  - `https://gentle-cliff-07e205d03.7.azurestaticapps.net` (some browsers
+    send Referer with no trailing slash)
+  - Any custom domain you wire up to the Static Web App, in both
+    `https://example.com/*` and bare-origin variants.
   - `http://localhost:5173/*` and `http://localhost:5173` (local dev)
 - **API restrictions** — Limit the key to the APIs the app actually needs:
   Identity Toolkit API, Cloud Firestore API, Firebase Installations API,
@@ -186,19 +188,22 @@ consistent with GDPR storage-limitation principles.
 ## 7. Troubleshooting
 
 **"Cloud not configured" pill on Profile.**
-The `VITE_FIREBASE_*` environment variables aren't reaching the build. For
-local dev, copy `.env.example` to `.env.local` and fill it in. For the
-GitHub Pages build, make sure the matching repo secrets exist (Settings →
-Secrets and variables → Actions) and re-run the deploy workflow.
+The `VITE_FIREBASE_*` environment variables aren't reaching the build.
+For local dev, copy `.env.example` to `.env.local` and fill it in. For
+the Azure Static Web Apps build, make sure the matching repo secrets
+exist (Settings → Secrets and variables → Actions) and that they are
+listed in the deploy step's `env:` block in
+`.github/workflows/azure-static-web-apps-*.yml`. Re-run the workflow
+after any secret change.
 
 **"Retrying…" pill with `auth/network-request-failed` or `Requests from referer … are blocked` in the browser console.**
-The API key's HTTP-referrer restriction is too narrow. Browsers default to
-`Referrer-Policy: strict-origin-when-cross-origin`, which sends only the
-*origin* (`https://manaiakalani.github.io/`) as `Referer`, **not** the full
-path. A pattern like `https://manaiakalani.github.io/CxEEMEAStepTracker/*`
-will therefore reject every real browser request with HTTP 403. Fix by
-adding `https://manaiakalani.github.io/*` (and the bare-origin variant) to
-the allowed websites in
+The API key's HTTP-referrer restriction is too narrow. Browsers default
+to `Referrer-Policy: strict-origin-when-cross-origin`, which sends only
+the *origin* (e.g. `https://gentle-cliff-07e205d03.7.azurestaticapps.net/`)
+as `Referer`, **not** the full path. A path-scoped pattern will
+therefore reject every real browser request with HTTP 403. Fix by
+adding the bare-origin and `/*` variants of the deployed hostname (and
+any custom domain) to the allowed websites in
 [GCP Credentials](https://console.cloud.google.com/apis/credentials?project=cxeemeastep).
 Changes propagate within a couple of minutes.
 

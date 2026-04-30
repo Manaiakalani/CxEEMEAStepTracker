@@ -50,43 +50,6 @@ const SECTIONS: Section[] = [
     ),
   },
   {
-    id: "privacy",
-    icon: ShieldCheck,
-    title: "Privacy & data",
-    body: (
-      <>
-        <p>
-          We store as little as possible: <strong>display name, team, daily
-          goal, and step counts</strong>. No email, password, location, IP
-          geolocation, device fingerprint, or analytics.
-        </p>
-        <ul>
-          <li>
-            <strong>Where it lives.</strong> On this device (browser{" "}
-            <code>localStorage</code> + <code>IndexedDB</code>), mirrored to
-            Firebase Firestore in the EU (<code>europe-west</code>) under
-            project <code>cxeemeastep</code>.
-          </li>
-          <li>
-            <strong>Who you are to the cloud.</strong> An anonymous random
-            UID per browser. No identity is collected.
-          </li>
-          <li>
-            <strong>Erasure.</strong> "Reset week" / "Reset all data" on
-            Profile wipes this device immediately. Ask an organiser to remove
-            your Firestore row, or wait: the whole <code>users</code>{" "}
-            collection is purged within 14 days of the offsite ending.
-          </li>
-          <li>
-            <strong>Third parties.</strong> Google Cloud (Firestore + Auth,
-            EU), Google Fonts (the <em>Inter</em> typeface), GitHub Pages for
-            hosting. Nothing else.
-          </li>
-        </ul>
-      </>
-    ),
-  },
-  {
     id: "routes",
     icon: Route,
     title: "Suggested Munich routes",
@@ -216,6 +179,43 @@ const SECTIONS: Section[] = [
     ),
   },
   {
+    id: "privacy",
+    icon: ShieldCheck,
+    title: "Privacy & data",
+    body: (
+      <>
+        <p>
+          We store as little as possible: <strong>display name, team, daily
+          goal, and step counts</strong>. No email, password, location, IP
+          geolocation, device fingerprint, or analytics.
+        </p>
+        <ul>
+          <li>
+            <strong>Where it lives.</strong> On this device (browser{" "}
+            <code>localStorage</code> + <code>IndexedDB</code>), mirrored to
+            Firebase Firestore in the EU (<code>europe-west</code>) under
+            project <code>cxeemeastep</code>.
+          </li>
+          <li>
+            <strong>Who you are to the cloud.</strong> An anonymous random
+            UID per browser. No identity is collected.
+          </li>
+          <li>
+            <strong>Erasure.</strong> "Reset week" / "Reset all data" on
+            Profile wipes this device immediately. Ask an organiser to remove
+            your Firestore row, or wait: the whole <code>users</code>{" "}
+            collection is purged within 14 days of the offsite ending.
+          </li>
+          <li>
+            <strong>Third parties.</strong> Google Cloud (Firestore + Auth,
+            EU), Google Fonts (the <em>Inter</em> typeface), and Azure
+            Static Web Apps for hosting. Nothing else.
+          </li>
+        </ul>
+      </>
+    ),
+  },
+  {
     id: "important",
     icon: AlertTriangle,
     title: "The fine print",
@@ -284,7 +284,7 @@ export function AboutPage() {
           <section
             key={section.id}
             id={section.id}
-            className="border-b"
+            className="border-b about-section"
             style={{ borderColor: HAIRLINE }}
           >
             <div className="max-w-[1200px] mx-auto px-6 sm:px-10 py-12 grid grid-cols-12 gap-6 sm:gap-12">
