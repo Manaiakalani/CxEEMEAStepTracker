@@ -143,11 +143,11 @@ export function ProfilePage() {
               className="text-[22px] font-medium tracking-tight"
               style={{ color: INK }}
             >
-              Pick your team.
+              On the wrong team?
             </h2>
             <p className="text-[13.5px] mt-1" style={{ color: MUTED }}>
-              Your steps add to your team's offsite total. Switch any time —
-              we'll move your contribution.
+              Picked one by accident — or your team changed? Switch here and
+              we'll move your contribution to the new team's total.
             </p>
           </div>
           <div className="col-span-12 md:col-span-8">

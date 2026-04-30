@@ -48,31 +48,31 @@ export const CHALLENGES: ChallengeDef[] = [
     target: 12000,
   },
   {
-    id: "deutsches-museum",
-    name: "Deutsches Museum Mile",
+    id: "ms-munich-mile",
+    name: "Microsoft München Mile",
     story:
-      "Walk from your hotel to the world's largest science museum — and back.",
-    target: 7000,
-  },
-  {
-    id: "bmw-welt",
-    name: "BMW Welt to Olympiapark",
-    story:
-      "From shimmering BMW Welt to the 1972 Olympic complex — engineering and architecture.",
-    target: 9000,
-  },
-  {
-    id: "hofbrauhaus",
-    name: "Hofbräuhaus Stein Stroll",
-    story:
-      "From Marienplatz down to the world's most famous beer hall, founded by Duke Wilhelm V in 1589.",
+      "Marienplatz up to Microsoft's Munich home in Schwabing — Walter-Gropius-Straße, where the local CxE team lives day to day.",
     target: 7500,
   },
   {
-    id: "nymphenburg",
-    name: "Nymphenburg Palace Gardens",
+    id: "azure-west-europe",
+    name: "Azure West Europe Loop",
     story:
-      "Wander the baroque grounds where Bavarian royals once strolled — 200 hectares of canals, lakes, and pavilions.",
+      "A nod to the region powering half of EMEA — circle through the city as if you were tracing a packet across the West Europe datacenter.",
+    target: 9000,
+  },
+  {
+    id: "copilot-cadence",
+    name: "Copilot Cadence",
+    story:
+      "Walking-meeting pace along the Isar. AirPods optional, ideas required — every stride is a prompt, every break is a refinement.",
+    target: 8000,
+  },
+  {
+    id: "cxe-customer-connect",
+    name: "CxE Customer Connect",
+    story:
+      "The classic walking 1:1 — long enough for a real conversation, short enough to make the next session. The route is the meeting.",
     target: 11000,
   },
 ];
