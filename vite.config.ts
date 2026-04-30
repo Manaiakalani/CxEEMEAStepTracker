@@ -3,7 +3,9 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  base: "/CxEEMEAStepTracker/",
+  // Azure Static Web Apps serves the app at the domain root, so assets
+  // resolve relative to "/". (Previously "/CxEEMEAStepTracker/" for GH Pages.)
+  base: "/",
   plugins: [react(), tailwindcss()],
   build: {
     chunkSizeWarningLimit: 800,

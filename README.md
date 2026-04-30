@@ -93,7 +93,8 @@ region (`eur3 / europe-west`). Project: `cxeemeastep`.
   the organisers within 14 days of the offsite ending — consistent with
   GDPR storage-limitation principles.
 - **Third parties.** Google Cloud (Firebase Auth + Firestore, EU region)
-  for sync; Google Fonts for the Inter typeface; GitHub Pages for hosting.
+  for sync; Google Fonts for the Inter typeface; Azure Static Web Apps
+  for hosting.
 
 A more detailed write-up (privacy notice, suggested routes, and FAQ) is
 available inside the app on the **About** tab.
