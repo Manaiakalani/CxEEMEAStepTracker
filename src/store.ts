@@ -75,8 +75,8 @@ export type CloudStatus =
   | "offline"
   | "error";
 const DEFAULT_PROFILE: Profile = {
-  name: "Anja",
-  team: "Threat Protection",
+  name: "",
+  team: "",
   goal: 8000,
 };
 
@@ -352,7 +352,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const resetAll = useCallback(() => {
     const fresh = buildInitial();
     // After a full reset, send the user back through onboarding so the
-    // seed defaults (Anja / Threat Protection) aren't silently kept.
+    // empty profile defaults aren't silently kept (and never reach the
+    // cloud — sync is gated on having a real name + team).
     setState({ ...fresh, onboarded: false });
   }, []);
 
@@ -443,9 +444,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // otherwise be inflated by ~48k steps per first-time visitor before they
   // actually walk. Existing v1 saves migrate to onboarded:true on load, so
   // current users continue to sync as before.
+  // Cloud sync gate: only push to Firestore once the user has actually
+  // completed onboarding AND we have a real name + team. This keeps
+  // half-finished or skipped onboardings from polluting the leaderboard
+  // (e.g. an empty name or a default-bucket team the user never picked).
   useEffect(() => {
     if (!isFirebaseConfigured()) return;
     if (!state.onboarded) return;
+    if (!state.profile.name.trim()) return;
+    if (!state.profile.team.trim()) return;
     let cancelled = false;
     const timer = window.setTimeout(async () => {
       let uid = cloudUidRef.current;

@@ -37,7 +37,7 @@ export function ProfilePage() {
 
   function save() {
     const goalNum = Math.max(1000, Number(goal.replace(/[^\d]/g, "")) || 8000);
-    setProfile({ name: name.trim() || "Anja", goal: goalNum, team });
+    setProfile({ name: name.trim(), goal: goalNum, team });
     setGoal(String(goalNum));
     setSavedAt(Date.now());
     window.setTimeout(() => setSavedAt(null), 2000);
@@ -348,12 +348,12 @@ export function ProfilePage() {
             )}
             {confirmReset === "all" ? (
               <ConfirmRow
-                message="Reset everything to defaults? This re-seeds the prior week."
+                message="Reset everything? Step entries are cleared and the welcome flow runs again."
                 onConfirm={() => {
                   resetAll();
-                  setName("Anja");
+                  setName("");
                   setGoal("8000");
-                  setTeam("Threat Protection");
+                  setTeam("");
                   setConfirmReset("none");
                 }}
                 onCancel={() => setConfirmReset("none")}

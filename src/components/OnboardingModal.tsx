@@ -82,10 +82,26 @@ export function OnboardingModal() {
   }, [name, walkers]);
 
   function finish(skipped: boolean) {
+    if (skipped) {
+      // User dismissed the modal without explicit Start. Only commit
+      // onboarding (and start cloud sync) if the existing profile is
+      // already complete from a prior session. Otherwise just close the
+      // modal locally; the next mount will reopen it because `onboarded`
+      // stays false. This prevents a silent default-team tag.
+      if (profile.name.trim() && profile.team.trim()) {
+        completeOnboarding({
+          name: profile.name,
+          team: profile.team,
+          goal: profile.goal,
+        });
+      }
+      setOpen(false);
+      return;
+    }
     completeOnboarding({
-      name: skipped ? profile.name : name.trim() || profile.name,
-      team: skipped ? profile.team : team || profile.team,
-      goal: skipped ? profile.goal : goal,
+      name: name.trim() || profile.name,
+      team: team || profile.team,
+      goal,
     });
     setOpen(false);
   }

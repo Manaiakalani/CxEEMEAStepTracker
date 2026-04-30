@@ -32,7 +32,7 @@ export function Hero() {
               className="text-[36px] sm:text-[44px] leading-[1.05] font-semibold tracking-tight"
               style={{ color: INK }}
             >
-              Guten Tag, {profile.name}.
+              Guten Tag{profile.name ? `, ${profile.name}` : ""}.
             </h1>
             <p
               className="text-[15px] mt-3 max-w-md"
