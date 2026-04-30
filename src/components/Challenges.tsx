@@ -2,7 +2,15 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { useState } from "react";
 import { useStore, weekTotalFor } from "../store";
 import { CHALLENGES } from "../data";
-import { BAYERN, BAYERN_SOFT, HAIRLINE, INK, MUTED } from "../theme";
+import {
+  ALPENGLOW,
+  ALPENGLOW_SOFT,
+  BAR_REST,
+  BAYERN,
+  HAIRLINE,
+  INK,
+  MUTED,
+} from "../theme";
 import { formatNumber } from "../lib/format";
 
 const PREVIEW_COUNT = 4;
@@ -45,6 +53,10 @@ export function Challenges() {
             const current = Math.min(c.target, week);
             const pct = Math.min(100, Math.round((current / c.target) * 100));
             const done = current >= c.target;
+            // Progress hue tells the story: cool at rest, brand mid-stride,
+            // alpenglow at the summit. Picked at thresholds so transitions
+            // feel earned rather than gradient-y.
+            const barColor = done ? ALPENGLOW : pct >= 50 ? BAYERN : BAR_REST;
             return (
               <li
                 key={c.id}
@@ -69,8 +81,8 @@ export function Challenges() {
                     </h3>
                     {done && (
                       <span
-                        className="inline-flex items-center gap-1 text-[11px] px-2 h-5 rounded-full"
-                        style={{ background: BAYERN_SOFT, color: BAYERN }}
+                        className="inline-flex items-center gap-1 text-[11px] px-2 h-5 rounded-full transition-colors"
+                        style={{ background: ALPENGLOW_SOFT, color: ALPENGLOW }}
                       >
                         <Check className="w-3 h-3" strokeWidth={2} />
                         done
@@ -93,8 +105,9 @@ export function Challenges() {
                       className="h-full rounded-full"
                       style={{
                         width: `${pct}%`,
-                        background: BAYERN,
-                        transition: "width 500ms ease",
+                        background: barColor,
+                        transition:
+                          "width 500ms ease, background-color 300ms ease",
                       }}
                     />
                   </div>

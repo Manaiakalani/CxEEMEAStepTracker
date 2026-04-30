@@ -17,3 +17,15 @@ export const WARN = "var(--color-warn)";
 export const SURFACE = "var(--surface)";
 export const SURFACE_RAISED = "var(--surface-raised)";
 export const BAR_REST = "var(--color-bar-rest)";
+
+/* Accents — used sparingly, with intent. */
+export const ALPENGLOW = "var(--color-alpenglow)";
+export const ALPENGLOW_SOFT = "var(--color-alpenglow-soft)";
+export const MEADOW = "var(--color-meadow)";
+export const MEADOW_SOFT = "var(--color-meadow-soft)";
+export const GOLD = "var(--color-gold)";
+export const GOLD_SOFT = "var(--color-gold-soft)";
+export const SILVER = "var(--color-silver)";
+export const SILVER_SOFT = "var(--color-silver-soft)";
+export const BRONZE = "var(--color-bronze)";
+export const BRONZE_SOFT = "var(--color-bronze-soft)";

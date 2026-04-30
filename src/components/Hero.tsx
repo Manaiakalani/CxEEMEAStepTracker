@@ -17,6 +17,7 @@ export function Hero() {
   return (
     <header className="relative overflow-hidden">
       <div className="absolute inset-0 hero-gradient" />
+      <div className="absolute inset-0 hero-glow" aria-hidden="true" />
       <MountainSilhouette />
       <div className="relative max-w-[1200px] mx-auto px-6 sm:px-10 pt-12 sm:pt-16 pb-20 sm:pb-24">
         <div className="flex items-start justify-between gap-8 sm:gap-12 flex-col sm:flex-row">

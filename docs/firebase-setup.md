@@ -32,32 +32,73 @@ enforced without anyone making accounts.
 2. Open the **Sign-in method** tab.
 3. Enable **Anonymous** and save.
 
-## 3. Register the Web app & copy the config
+## 3. Register the Web app & wire up the config
 
 1. **Project settings (gear icon) → General → Your apps**.
 2. Click the **`</>` Web** icon to register a new web app
    (e.g. name it `step-tracker-web`). You do **not** need Firebase Hosting.
-3. Firebase shows a `firebaseConfig` object. Copy the values into
-   `src/firebase-config.ts`:
+3. Firebase shows a `firebaseConfig` object. The values are read at build
+   time from environment variables — **do not paste them into source**.
 
-   ```ts
-   export const firebaseConfig = {
-     apiKey: "AIza…",                 // ← paste
-     authDomain: "cxeemeastep.firebaseapp.com",
-     projectId: "cxeemeastep",
-     storageBucket: "cxeemeastep.appspot.com",
-     messagingSenderId: "…",          // ← paste
-     appId: "1:…:web:…",              // ← paste
-   };
+   **For local development** — copy `.env.example` to `.env.local` (already
+   gitignored) and fill in:
+
+   ```bash
+   cp .env.example .env.local
    ```
 
-   Web config values are **safe to commit**: they're not secrets, they only
-   identify the project. Security is enforced server-side by
-   `firestore.rules`.
+   ```env
+   VITE_FIREBASE_API_KEY=AIza…
+   VITE_FIREBASE_AUTH_DOMAIN=cxeemeastep.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=cxeemeastep
+   VITE_FIREBASE_STORAGE_BUCKET=cxeemeastep.firebasestorage.app
+   VITE_FIREBASE_MESSAGING_SENDER_ID=…
+   VITE_FIREBASE_APP_ID=1:…:web:…
+   VITE_FIREBASE_MEASUREMENT_ID=G-…
+   ```
 
-4. Once `apiKey` and `appId` are non-empty, `isFirebaseConfigured()`
-   flips to `true` and the cloud sync toggle on the Profile screen
-   becomes functional. Until then the toggle stays dormant for everyone.
+   **For GitHub Pages CI** — open
+   **Repo → Settings → Secrets and variables → Actions → New repository
+   secret** and add each variable above as a separate secret with the same
+   name. The `.github/workflows/deploy.yml` workflow injects them into the
+   Vite build.
+
+4. Once `VITE_FIREBASE_API_KEY` and `VITE_FIREBASE_APP_ID` are present at
+   build time, `isFirebaseConfigured()` returns `true` and cloud sync runs
+   automatically for every visitor. Without them, the app falls back to a
+   purely local experience.
+
+### Why env vars instead of committing the config?
+
+Firebase web API keys are technically not secrets — they identify the
+project, and real authorisation is enforced by `firestore.rules`. **But**
+GitHub's secret scanner and most security tooling will flag a `AIza…` key
+in the source tree, which generates noise and is a bad pattern to model
+for forks. Keep them in env vars and lock them down at the platform layer:
+
+- **HTTP referrer restrictions** — In the
+  [Google Cloud Console → APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials?project=cxeemeastep),
+  open the Firebase browser key and set **Application restrictions →
+  Websites** to:
+  - `https://manaiakalani.github.io/CxEEMEAStepTracker/*`
+  - `http://localhost:5173/*` (for local dev)
+- **API restrictions** — Limit the key to the APIs the app actually needs:
+  Identity Toolkit API, Cloud Firestore API, Firebase Installations API,
+  Token Service API.
+
+With these restrictions in place, even a leaked key cannot be used from an
+unauthorised origin.
+
+### If a key has already been exposed
+
+Treat it as compromised regardless of its public-by-design nature:
+
+1. **Rotate it.** GCP Console → Credentials → ⋮ next to the browser key
+   → **Regenerate key**. Update the value in repo secrets and `.env.local`.
+2. **Apply the restrictions above** to the new key before redeploying.
+3. **Optionally scrub git history** with
+   [`git filter-repo`](https://github.com/newren/git-filter-repo) and
+   force-push, so the old key no longer appears in commit diffs.
 
 ## 4. Deploy the Firestore security rules
 

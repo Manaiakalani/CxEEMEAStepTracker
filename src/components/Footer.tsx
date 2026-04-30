@@ -15,12 +15,11 @@ export function Footer() {
         <div className="flex items-center gap-5 text-[12px] tracking-tight">
           <button
             onClick={() => setTab("about")}
-            className="hover:underline"
+            className="hover:underline transition-colors"
             style={{ color: BAYERN }}
           >
             About &amp; FAQ
           </button>
-          <span>Always-on cloud sync · works offline.</span>
         </div>
       </div>
     </footer>

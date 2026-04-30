@@ -282,8 +282,8 @@ const SECTIONS: Section[] = [
             I found a bug or have a feature request.
           </dt>
           <dd className="mt-1">
-            Reach out to Max Stein or one of the CxE admins, or open an issue
-            on the{" "}
+            Reach out to one of the CxE EMEA offsite organisers, or open an
+            issue on the{" "}
             <a
               href="https://github.com/Manaiakalani/CxEEMEAStepTracker/issues"
               target="_blank"

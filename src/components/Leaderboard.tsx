@@ -1,6 +1,25 @@
 import { useStore, leaderboardWith } from "../store";
-import { BAR_REST, BAYERN, BAYERN_SOFT, HAIRLINE, INK, MUTED } from "../theme";
+import {
+  BAR_REST,
+  BAYERN,
+  BAYERN_SOFT,
+  BRONZE,
+  BRONZE_SOFT,
+  GOLD,
+  GOLD_SOFT,
+  HAIRLINE,
+  INK,
+  MUTED,
+  SILVER,
+  SILVER_SOFT,
+} from "../theme";
 import { formatNumber } from "../lib/format";
+
+const MEDALS: Array<{ fg: string; bg: string }> = [
+  { fg: GOLD, bg: GOLD_SOFT },
+  { fg: SILVER, bg: SILVER_SOFT },
+  { fg: BRONZE, bg: BRONZE_SOFT },
+];
 
 export function Leaderboard({
   limit = 5,
@@ -64,12 +83,27 @@ export function Leaderboard({
                 }}
               >
                 <div className="col-span-2 sm:col-span-1 flex items-center">
-                  <span
-                    className="text-[16px] sm:text-[18px] font-medium tracking-tight tabular-nums"
-                    style={{ color: t.mine ? BAYERN : INK }}
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
+                  {i < 3 ? (
+                    <span
+                      className="inline-flex items-center justify-center w-7 h-7 rounded-full text-[12.5px] font-semibold tabular-nums"
+                      style={{
+                        background: MEDALS[i].bg,
+                        color: MEDALS[i].fg,
+                      }}
+                      aria-label={
+                        ["First", "Second", "Third"][i] + " place"
+                      }
+                    >
+                      {i + 1}
+                    </span>
+                  ) : (
+                    <span
+                      className="text-[16px] sm:text-[18px] font-medium tracking-tight tabular-nums"
+                      style={{ color: t.mine ? BAYERN : INK }}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                  )}
                 </div>
                 <div className="col-span-10 sm:col-span-4">
                   <div className="flex items-center gap-2 flex-wrap">
