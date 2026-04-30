@@ -1,9 +1,12 @@
-# Firebase setup (optional cloud sync)
+# Firebase setup (always-on cloud sync)
 
-The Step Tracker is **local-first by default**. This document is for the
-repo owner / offsite organiser who wants to enable an optional, shared
-leaderboard backed by Firebase Firestore. End-users still have to opt in
-from **Profile → Cloud sync** before anything leaves their device.
+This document is for the repo owner / offsite organiser. The Step Tracker
+treats cloud sync as **always-on** when configured: every visitor is signed
+in anonymously, their snapshot is mirrored to Firestore in the background,
+and offline-resilience is provided by the Firestore SDK's persistent local
+cache. There is no end-user opt-in toggle — the only way to "disable" it is
+to ship with `src/firebase-config.ts` empty, in which case the app falls
+back to a purely local experience.
 
 The Firebase project for the offsite is:
 
@@ -90,23 +93,28 @@ firebase deploy --only firestore:rules --project cxeemeastep
 You should see the rules update in the Firebase Console under
 **Firestore Database → Rules**.
 
-## 5. How users opt in
+## 5. What end-users see
 
-Once the config is filled in and rules are deployed:
+Once the config is filled in and rules are deployed, **no user action is
+required**:
 
-1. A user opens the app and goes to **Profile**.
-2. They click **Turn cloud sync on** under the **Cloud sync** section.
-3. The app signs them in anonymously and pushes their current snapshot
-   (`name`, `team`, `goal`, `entries`) to `users/{uid}`.
-4. After that, any change to their profile or step entries is mirrored
-   to Firestore in the background (debounced ~600 ms).
-
-The toggle is **off by default** for every user. They can switch it off
-again at any time — local data stays untouched.
+1. A visitor opens the app — the Firebase SDK initialises with an
+   IndexedDB-backed persistent local cache.
+2. They are signed in anonymously in the background. The anonymous UID is
+   cached in IndexedDB and survives reloads (even offline) on subsequent
+   visits.
+3. Their current snapshot (`name`, `team`, `goal`, `entries`) is written to
+   `users/{uid}`.
+4. Any subsequent change to their profile or step entries is mirrored to
+   Firestore in the background (debounced ~600 ms).
+5. If they go offline, writes are buffered locally by the SDK and flushed
+   automatically once the connection returns. The **Profile → Cloud sync**
+   panel reflects the live state (Synced / Offline — saving locally /
+   Connecting…).
 
 ## 6. Privacy implications
 
-When a user enables cloud sync, the following leaves their device:
+The following leaves each user's device:
 
 - their **display name** (free-form, ≤ 60 chars),
 - their **team** selection,
@@ -114,8 +122,9 @@ When a user enables cloud sync, the following leaves their device:
 - their **per-day step counts** keyed by ISO date.
 
 Nothing else. No device IDs, no IPs beyond the standard Firebase request
-metadata, no email, no location. When the toggle is off, the app behaves
-exactly as the original local-first build — no Firebase code runs.
+metadata, no email, no location. If you ship a build with
+`src/firebase-config.ts` left empty, the app behaves as a purely local
+build — no Firebase code talks to the network.
 
 After the offsite, you can wipe centrally-stored data with:
 

@@ -20,7 +20,7 @@ export function Footer() {
           >
             About &amp; FAQ
           </button>
-          <span>Data stored locally in your browser.</span>
+          <span>Always-on cloud sync · works offline.</span>
         </div>
       </div>
     </footer>

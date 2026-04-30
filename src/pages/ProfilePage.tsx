@@ -12,9 +12,7 @@ export function ProfilePage() {
     setProfile,
     resetWeek,
     resetAll,
-    cloudSync,
     cloudStatus,
-    setCloudSync,
   } = useStore();
   const [name, setName] = useState(profile.name);
   const [goal, setGoal] = useState(String(profile.goal));
@@ -146,10 +144,10 @@ export function ProfilePage() {
               className="text-[22px] font-medium tracking-tight"
               style={{ color: INK }}
             >
-              Cloud sync (optional).
+              Always-on cloud sync.
             </h2>
             <p className="text-[13.5px] mt-1" style={{ color: MUTED }}>
-              Off by default. Local-first stays the default experience.
+              Steps mirror live to the offsite leaderboard.
             </p>
           </div>
           <div className="col-span-12 md:col-span-8 flex flex-col gap-4 items-start">
@@ -157,31 +155,14 @@ export function ProfilePage() {
               className="text-[14px] leading-[1.6] max-w-[60ch]"
               style={{ color: MUTED }}
             >
-              Sync your name, team, and step totals to a shared Firebase
-              project so the leaderboard reflects everyone in real time. You
-              can turn this off anytime; your local data stays put. When off,
-              this app is fully local and offline.
+              Your display name, team, daily goal, and step counts sync
+              automatically to the shared offsite Firestore project so the
+              live leaderboard reflects everyone in real time. If your
+              connection drops, new entries are saved on this device and pushed
+              to the cloud as soon as you're back online — no action needed.
             </p>
-            <div className="flex items-center gap-3 flex-wrap">
-              <button
-                onClick={() => setCloudSync(!cloudSync)}
-                aria-pressed={cloudSync}
-                className="h-12 px-6 rounded-full inline-flex items-center gap-2 text-[14px] font-medium tracking-tight transition-all"
-                style={
-                  cloudSync
-                    ? { background: BAYERN, color: "#fff" }
-                    : {
-                        border: `1px solid ${HAIRLINE}`,
-                        color: INK,
-                        background: "transparent",
-                      }
-                }
-              >
-                {cloudSync ? "Cloud sync on" : "Turn cloud sync on"}
-              </button>
-              <CloudStatusPill status={cloudStatus} enabled={cloudSync} />
-            </div>
-            {cloudSync && cloudStatus === "error" ? (
+            <CloudStatusPill status={cloudStatus} />
+            {cloudStatus === "unconfigured" ? (
               <div
                 className="text-[13px] leading-[1.55] rounded-md px-4 py-3 max-w-[60ch]"
                 style={{
@@ -191,8 +172,21 @@ export function ProfilePage() {
                 }}
               >
                 Cloud sync isn't configured for this build yet. Your data is
-                still safe on this device. Ask the offsite organiser to finish
-                the Firebase setup, then toggle this back on.
+                still safe on this device — ask the offsite organiser to
+                finish the Firebase setup.
+              </div>
+            ) : null}
+            {cloudStatus === "error" ? (
+              <div
+                className="text-[13px] leading-[1.55] rounded-md px-4 py-3 max-w-[60ch]"
+                style={{
+                  border: `1px solid ${HAIRLINE}`,
+                  color: INK,
+                  background: "transparent",
+                }}
+              >
+                We couldn't reach the cloud just now. Your steps are saved
+                locally and we'll retry automatically — no action needed.
               </div>
             ) : null}
           </div>
@@ -362,30 +356,47 @@ function ConfirmRow({
   );
 }
 
-function CloudStatusPill({
-  status,
-  enabled,
-}: {
-  status: CloudStatus;
-  enabled: boolean;
-}) {
-  let label = "Off";
-  if (enabled) {
-    if (!isFirebaseConfigured()) label = "Cloud not configured";
-    else if (status === "connecting") label = "Connecting…";
-    else if (status === "synced") label = "Synced";
-    else if (status === "error") label = "Cloud not configured";
-    else label = "Off";
+function CloudStatusPill({ status }: { status: CloudStatus }) {
+  let label: string;
+  let dotColor: string;
+  switch (status) {
+    case "synced":
+      label = "Synced to cloud";
+      dotColor = "#2E7D5A"; // success green
+      break;
+    case "offline":
+      label = "Offline — saving locally";
+      dotColor = "#C97A1A"; // warn amber
+      break;
+    case "connecting":
+      label = "Connecting…";
+      dotColor = MUTED;
+      break;
+    case "error":
+      label = "Retrying…";
+      dotColor = "#C97A1A";
+      break;
+    case "unconfigured":
+    default:
+      label = isFirebaseConfigured()
+        ? "Connecting…"
+        : "Cloud not configured";
+      dotColor = MUTED;
   }
   return (
     <span
-      className="inline-flex items-center h-7 px-3 rounded-full text-[11.5px] font-medium tracking-tight"
+      className="inline-flex items-center gap-2 h-7 px-3 rounded-full text-[11.5px] font-medium tracking-tight"
       style={{
         border: `1px solid ${HAIRLINE}`,
         color: MUTED,
       }}
       aria-live="polite"
     >
+      <span
+        aria-hidden="true"
+        className="inline-block w-1.5 h-1.5 rounded-full"
+        style={{ background: dotColor }}
+      />
       {label}
     </span>
   );

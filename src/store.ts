@@ -12,7 +12,7 @@ import { createElement } from "react";
 import { isoDate, lastNDays } from "./lib/format";
 import { SEED_PRIOR_DAYS, TEAMS } from "./data";
 import { isFirebaseConfigured } from "./firebase-config";
-import { pushUserSnapshot, signInAnon } from "./lib/cloud-sync";
+import { ensureAnonUser, onAuthChange, pushUserSnapshot } from "./lib/cloud-sync";
 
 export type TabKey =
   | "dashboard"
@@ -46,9 +46,23 @@ type Persisted = {
 
 const STORAGE_KEY = "alpine-step-tracker:v1";
 const THEME_STORAGE_KEY = "alpine-step-tracker:theme";
-const CLOUD_SYNC_STORAGE_KEY = "alpine-step-tracker:cloud-sync";
 
-export type CloudStatus = "off" | "connecting" | "synced" | "error";
+/**
+ * Cloud sync states (always-on architecture):
+ *   - "unconfigured": Firebase web config has not been filled in.
+ *   - "connecting":   Initial anon sign-in / first push is in flight.
+ *   - "synced":       Online and the latest local snapshot has been pushed.
+ *   - "offline":      Browser is offline; writes are buffered locally and
+ *                     will be flushed automatically by the Firestore SDK
+ *                     once the network is restored.
+ *   - "error":        Sign-in or write failed for another reason.
+ */
+export type CloudStatus =
+  | "unconfigured"
+  | "connecting"
+  | "synced"
+  | "offline"
+  | "error";
 const DEFAULT_PROFILE: Profile = {
   name: "Anja",
   team: "Threat Protection",
@@ -173,7 +187,6 @@ type StoreValue = {
   todayKey: string;
   todaySteps: number;
   theme: ThemeMode;
-  cloudSync: boolean;
   cloudStatus: CloudStatus;
   setTab: (t: TabKey) => void;
   addSteps: (amount: number, source?: "manual" | "quick") => void;
@@ -182,17 +195,7 @@ type StoreValue = {
   setTheme: (t: ThemeMode) => void;
   resetWeek: () => void;
   resetAll: () => void;
-  setCloudSync: (enabled: boolean) => void;
 };
-
-function loadInitialCloudSync(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return window.localStorage.getItem(CLOUD_SYNC_STORAGE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
 
 const StoreContext = createContext<StoreValue | null>(null);
 
@@ -200,11 +203,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<Persisted>(() => loadInitial());
   const [tab, setTab] = useState<TabKey>("dashboard");
   const [theme, setThemeState] = useState<ThemeMode>(() => loadInitialTheme());
-  const [cloudSync, setCloudSyncState] = useState<boolean>(() =>
-    loadInitialCloudSync(),
+  const [cloudStatus, setCloudStatus] = useState<CloudStatus>(() =>
+    isFirebaseConfigured()
+      ? typeof navigator !== "undefined" && !navigator.onLine
+        ? "offline"
+        : "connecting"
+      : "unconfigured",
   );
-  const [cloudStatus, setCloudStatus] = useState<CloudStatus>("off");
   const cloudUidRef = useRef<string | null>(null);
+  const onlineRef = useRef<boolean>(
+    typeof navigator === "undefined" ? true : navigator.onLine,
+  );
 
   // Apply theme to <html data-theme=...> and persist.
   useEffect(() => {
@@ -299,65 +308,70 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setState(fresh);
   }, []);
 
-  const setCloudSync = useCallback(
-    (enabled: boolean) => {
-      setCloudSyncState(enabled);
-      try {
-        window.localStorage.setItem(
-          CLOUD_SYNC_STORAGE_KEY,
-          enabled ? "1" : "0",
-        );
-      } catch {
-        /* ignore */
-      }
-      if (!enabled) {
-        setCloudStatus("off");
-        cloudUidRef.current = null;
-        return;
-      }
-      if (!isFirebaseConfigured()) {
-        console.warn(
-          "[cloud-sync] Cloud sync enabled but firebase-config.ts is empty.",
-        );
-        setCloudStatus("error");
-        return;
-      }
-      setCloudStatus("connecting");
-      void (async () => {
-        const uid = await signInAnon();
-        if (!uid) {
-          setCloudStatus("error");
-          return;
-        }
-        cloudUidRef.current = uid;
-        const ok = await pushUserSnapshot(uid, {
-          name: state.profile.name,
-          team: state.profile.team,
-          goal: state.profile.goal,
-          entries: state.entries,
-        });
-        setCloudStatus(ok ? "synced" : "error");
-      })();
-    },
-    [state.profile, state.entries],
-  );
-
-  // Debounced background mirror of profile + entries to Firestore whenever
-  // they change, but only while cloud sync is on and configured.
+  // Cloud sync: always on when Firebase is configured. We track auth via
+  // onAuthStateChanged so a cached anonymous user (restored from IndexedDB
+  // on reload, even offline) is picked up immediately. We also listen for
+  // browser online/offline events so the UI status reflects reality —
+  // Firestore's persistent local cache buffers writes through outages and
+  // flushes them automatically when the connection returns.
   useEffect(() => {
-    if (!cloudSync) return;
     if (!isFirebaseConfigured()) {
-      setCloudStatus("error");
+      setCloudStatus("unconfigured");
       return;
     }
+
+    const updateOnlineStatus = () => {
+      const online = typeof navigator === "undefined" ? true : navigator.onLine;
+      onlineRef.current = online;
+      // Don't overwrite "connecting" on a flicker; only flip when we have
+      // a UID (i.e. we've at least signed in once).
+      if (!cloudUidRef.current) return;
+      setCloudStatus(online ? "synced" : "offline");
+    };
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
+
+    const unsubAuth = onAuthChange((user) => {
+      if (user) {
+        cloudUidRef.current = user.uid;
+        setCloudStatus(onlineRef.current ? "synced" : "offline");
+      } else {
+        // No cached user — kick off an anonymous sign-in. While offline this
+        // will fail (the very first sign-in needs network), so we surface
+        // "offline" rather than "error" in that case.
+        void (async () => {
+          const uid = await ensureAnonUser();
+          if (uid) {
+            cloudUidRef.current = uid;
+            setCloudStatus(onlineRef.current ? "synced" : "offline");
+          } else {
+            setCloudStatus(onlineRef.current ? "error" : "offline");
+          }
+        })();
+      }
+    });
+
+    return () => {
+      unsubAuth();
+      window.removeEventListener("online", updateOnlineStatus);
+      window.removeEventListener("offline", updateOnlineStatus);
+    };
+  }, []);
+
+  // Debounced background mirror of profile + entries to Firestore whenever
+  // they change. With persistent local cache enabled, writes succeed against
+  // the local IndexedDB instantly and are flushed to the server on the next
+  // reconnect — so we always attempt the push and let the SDK figure out
+  // delivery. Status is derived from `navigator.onLine`.
+  useEffect(() => {
+    if (!isFirebaseConfigured()) return;
     let cancelled = false;
     const timer = window.setTimeout(async () => {
       let uid = cloudUidRef.current;
       if (!uid) {
-        setCloudStatus("connecting");
-        uid = await signInAnon();
+        uid = await ensureAnonUser();
         if (!uid || cancelled) {
-          if (!cancelled) setCloudStatus("error");
+          if (!cancelled && onlineRef.current) setCloudStatus("error");
           return;
         }
         cloudUidRef.current = uid;
@@ -369,13 +383,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         entries: state.entries,
       });
       if (cancelled) return;
-      setCloudStatus(ok ? "synced" : "error");
+      if (!ok) {
+        setCloudStatus(onlineRef.current ? "error" : "offline");
+        return;
+      }
+      setCloudStatus(onlineRef.current ? "synced" : "offline");
     }, 600);
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [cloudSync, state.profile, state.entries]);
+  }, [state.profile, state.entries]);
 
   const todaySteps = state.entries[todayKey] ?? 0;
 
@@ -388,7 +406,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       todayKey,
       todaySteps,
       theme,
-      cloudSync,
       cloudStatus,
       setTab,
       addSteps,
@@ -397,7 +414,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setTheme,
       resetWeek,
       resetAll,
-      setCloudSync,
     }),
     [
       state,
@@ -405,7 +421,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       todayKey,
       todaySteps,
       theme,
-      cloudSync,
       cloudStatus,
       addSteps,
       setProfile,
@@ -413,7 +428,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setTheme,
       resetWeek,
       resetAll,
-      setCloudSync,
     ],
   );
 

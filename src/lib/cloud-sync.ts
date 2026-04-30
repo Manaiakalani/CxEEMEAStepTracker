@@ -1,18 +1,22 @@
 import { initializeApp, type FirebaseApp } from "firebase/app";
 import {
   getAuth,
+  onAuthStateChanged,
   signInAnonymously,
   type Auth,
+  type User,
 } from "firebase/auth";
 import {
-  getFirestore,
-  setDoc,
-  doc,
   collection,
-  onSnapshot,
-  query,
+  doc,
+  initializeFirestore,
   limit,
+  onSnapshot,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  query,
   serverTimestamp,
+  setDoc,
   type Firestore,
 } from "firebase/firestore";
 import { firebaseConfig, isFirebaseConfigured } from "../firebase-config";
@@ -43,6 +47,12 @@ let handles: FirebaseHandles | null = null;
  * Lazily initializes Firebase the first time it's requested. Returns null if
  * the app hasn't been configured yet (i.e. `firebase-config.ts` still has
  * placeholder values), so the rest of the app can stay completely dormant.
+ *
+ * We use `initializeFirestore` (rather than `getFirestore`) so we can wire up
+ * the IndexedDB-backed `persistentLocalCache`. With that cache enabled,
+ * writes performed while offline are committed to the local cache instantly
+ * (so the UI stays responsive) and flushed to the server automatically when
+ * the network comes back. Reads also serve from the cache when offline.
  */
 export function getFirebase(): FirebaseHandles | null {
   if (!isFirebaseConfigured()) return null;
@@ -50,7 +60,11 @@ export function getFirebase(): FirebaseHandles | null {
   try {
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
+    const db = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    });
     handles = { app, auth, db };
     return handles;
   } catch (err) {
@@ -59,9 +73,28 @@ export function getFirebase(): FirebaseHandles | null {
   }
 }
 
-export async function signInAnon(): Promise<string | null> {
+/**
+ * Subscribe to auth state changes. The callback fires immediately with the
+ * current user (which may be a previously-cached anonymous user restored
+ * from IndexedDB, even offline) and again whenever it changes.
+ */
+export function onAuthChange(cb: (user: User | null) => void): () => void {
+  const fb = getFirebase();
+  if (!fb) {
+    cb(null);
+    return () => {};
+  }
+  return onAuthStateChanged(fb.auth, cb);
+}
+
+/**
+ * Ensure the user is signed in anonymously. If a cached anonymous user is
+ * already restored from IndexedDB, returns its UID without a network call.
+ */
+export async function ensureAnonUser(): Promise<string | null> {
   const fb = getFirebase();
   if (!fb) return null;
+  if (fb.auth.currentUser) return fb.auth.currentUser.uid;
   try {
     const cred = await signInAnonymously(fb.auth);
     return cred.user.uid;
@@ -71,6 +104,13 @@ export async function signInAnon(): Promise<string | null> {
   }
 }
 
+/**
+ * Write the user's snapshot. With persistent local cache enabled, this
+ * resolves once the write hits the local IndexedDB cache; the SDK then
+ * forwards it to Firestore in the background (instantly when online, on
+ * reconnect when offline). We deliberately don't `await` server
+ * acknowledgement here because that would hang on slow or no-network paths.
+ */
 export async function pushUserSnapshot(
   uid: string,
   snapshot: UserSnapshot,

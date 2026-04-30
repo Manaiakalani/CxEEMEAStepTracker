@@ -11,7 +11,7 @@ A lightweight, Munich-themed step-tracking web app for the **CxE EMEA Offsite 20
 - **Leaderboard** — see how you stack up against fellow attendees.
 - **Teams** — team-by-team breakdown for friendly inter-team competition.
 - **Profile** — set your name, team, and personal daily goal.
-- **Local-first** — all data is stored in your browser via `localStorage`. No backend, no accounts, no tracking.
+- **Always-on cloud sync** — your steps mirror automatically to the shared offsite Firestore project (EU region) for a real-time leaderboard, with offline fallback so nothing is lost when Wi-Fi drops.
 - **Responsive & themed** — Inter typeface, alpine palette, custom mountain silhouette, and a `#1761A0` brand accent.
 
 ## 🛠 Tech Stack
@@ -73,37 +73,47 @@ src/
 
 ## 💾 Data & Privacy (GDPR-friendly)
 
-This is a **local-first** application. Everything you enter — display name,
-team, daily goal, and step counts — is stored exclusively in your browser's
-`localStorage` under the `alpine-step-tracker:v1` key. Nothing is transmitted
-to a server, no analytics or cookies are used, and no third-party trackers
-are loaded.
+Anything you enter — display name, team, daily goal, and step counts — is
+kept on this device (`localStorage` + Firestore's IndexedDB cache) **and**
+mirrored to a Firebase Firestore database hosted by Google Cloud in the EU
+region (`eur3 / europe-west`). Project: `cxeemeastep`.
 
-Because no personal data ever leaves your device, this app does not act as a
-"controller" or "processor" of personal data under the GDPR — you remain in
-full control of your own data at all times.
-
-- **Right to erasure:** the Profile screen offers "Reset week" and "Reset all
-  data" controls; clearing the site's storage in your browser also wipes
-  everything immediately.
-- **Minimal data:** only a display name, a team selection, and step counts.
-  No email, location, or device identifiers.
-- **Third parties:** the only external resource loaded is the Inter typeface
-  from Google Fonts. The site itself is served from GitHub Pages.
+- **Anonymous sign-in only.** No email, password, or other identity is
+  collected. Each browser receives a stable random UID so your row in the
+  leaderboard can be updated.
+- **Minimal data.** Only display name, team, daily goal, and per-day step
+  counts ever leave the device. No location, IP-derived geo, device
+  fingerprints, analytics, or third-party trackers.
+- **Offline-resilient.** New entries are saved locally and pushed
+  automatically the moment you reconnect — no data loss.
+- **Right to erasure.** The Profile screen offers "Reset week" and "Reset
+  all data" to wipe local state. To remove your row from Firestore, ask the
+  offsite organiser (or project admin) to delete `users/<your-uid>`.
+- **Event lifecycle.** The Firestore `users` collection will be purged by
+  the organisers within 14 days of the offsite ending — consistent with
+  GDPR storage-limitation principles.
+- **Third parties.** Google Cloud (Firebase Auth + Firestore, EU region)
+  for sync; Google Fonts for the Inter typeface; GitHub Pages for hosting.
 
 A more detailed write-up — privacy notice, Munich theme days, suggested
 routes, and an FAQ — is available inside the app on the **About** tab.
 
-## ☁️ Optional cloud sync
+## ☁️ Cloud sync
 
-By default this app is fully local — nothing leaves your browser. There is
-also an **opt-in** Firebase Firestore sync that, when enabled, mirrors only
-your display name, team, daily goal, and step totals so a shared leaderboard
-can update in real time across devices. It's off by default and can be
-toggled from **Profile → Cloud sync** at any time.
+Cloud sync is **always on** when the app is configured. The Firebase
+project (`cxeemeastep`, EU region) is wired in at build time via
+`src/firebase-config.ts`. The Firestore SDK uses an IndexedDB-backed
+persistent local cache, so writes succeed instantly even offline and are
+flushed to the server automatically once connectivity returns. The
+**Profile → Cloud sync** panel surfaces the current state (Synced / Offline
+— saving locally / Connecting…).
 
-Repo owners: see [`docs/firebase-setup.md`](./docs/firebase-setup.md) for the
-one-time Firebase Console setup, the security rules, and how to deploy them.
+If `firebase-config.ts` is left empty in a fork, the app falls back to a
+purely local experience — no Firebase code talks to the network.
+
+Repo owners: see [`docs/firebase-setup.md`](./docs/firebase-setup.md) for
+the one-time Firebase Console setup, the security rules, and how to deploy
+them.
 
 ## 🤝 Contributing
 

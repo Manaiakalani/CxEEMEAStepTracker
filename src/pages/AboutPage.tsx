@@ -23,11 +23,11 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          The <strong>CxE EMEA Offsite 2026 Step Tracker</strong> is a small,
-          local-first web app built to encourage movement and friendly team
-          competition during our week in München. It's a lightweight
-          re-imagining of the previous CxE step trackers — pared back to the
-          essentials and styled around the Bavarian capital.
+          The <strong>CxE EMEA Offsite 2026 Step Tracker</strong> is a small
+          web app built to encourage movement and friendly team competition
+          during our week in München. It's a lightweight re-imagining of the
+          previous CxE step trackers — pared back to the essentials and
+          styled around the Bavarian capital.
         </p>
         <ul>
           <li>
@@ -47,8 +47,9 @@ const SECTIONS: Section[] = [
             Munich-night by night.
           </li>
           <li>
-            <strong>Local-first</strong> — no accounts, no cloud, no tracking.
-            Your data lives only in this browser.
+            <strong>Always-on cloud sync</strong> — your steps mirror to a
+            shared offsite Firestore project in real time, with offline
+            fallback so nothing is lost when the venue Wi-Fi drops.
           </li>
         </ul>
       </>
@@ -61,52 +62,53 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          <strong>Your privacy matters.</strong> Anything you enter (your
-          display name, team, daily goal, and step counts) is used solely to
-          power the dashboard, leaderboard, and team views during the offsite.
+          <strong>Your privacy matters.</strong> Anything you enter — display
+          name, team, daily goal, and step counts — is used solely to power
+          the dashboard, leaderboard, and team views during the offsite.
         </p>
         <ul>
           <li>
-            <strong>Local-only storage.</strong> All data is stored in this
-            browser's <code>localStorage</code> under{" "}
-            <code>alpine-step-tracker:v1</code>. Nothing is transmitted to a
-            server, no analytics, no cookies, no tracking pixels.
+            <strong>What we store, and where.</strong> Your snapshot is kept
+            on this device (browser <code>localStorage</code> +{" "}
+            <code>IndexedDB</code>) and mirrored to a Firebase Firestore
+            database hosted by Google Cloud in the <strong>EU</strong> region
+            (<code>eur3 / europe-west</code>). Project: <code>cxeemeastep</code>.
           </li>
           <li>
-            <strong>No personal data is processed off-device.</strong> Because
-            data never leaves your device, this app does not act as a "data
-            controller" or "processor" of personal data under the GDPR. You are
-            in full control of your own data at all times.
+            <strong>Anonymous sign-in only.</strong> The app signs you in
+            anonymously — no email, password, phone number, or other identity
+            is collected. Each browser receives a stable random UID so your
+            updates can be associated with your row in the leaderboard.
           </li>
           <li>
-            <strong>Minimal data.</strong> We only ask for a display name, a
-            team selection, and step counts — no email, no location, no device
-            identifiers.
+            <strong>Minimal data.</strong> Only your chosen display name,
+            team, daily goal, and per-day step counts ever leave the device.
+            No location, IP-derived geo, device fingerprints, or analytics.
           </li>
           <li>
-            <strong>Right to erasure.</strong> The Profile screen includes
-            "Reset week" and "Reset all data" controls. Clearing your browser's
-            site data for this page also removes everything immediately.
+            <strong>Offline-resilient.</strong> If you go offline mid-walk,
+            new entries are saved locally and pushed automatically the moment
+            you reconnect — no data loss, no manual action.
           </li>
           <li>
-            <strong>Cloud sync is opt-in.</strong> A "Cloud sync" toggle on
-            the Profile screen is <strong>off by default</strong>. When you
-            switch it on, only your display name, team, daily goal, and step
-            counts are sent to a shared Firebase project so the leaderboard
-            can reflect everyone in real time. Turn it off any time and your
-            local data stays put.
+            <strong>Right to erasure.</strong> The Profile screen offers
+            "Reset week" and "Reset all data" — these wipe local state
+            immediately. To remove your row from Firestore as well, ask the
+            offsite organiser (or the project admin) to delete{" "}
+            <code>users/&lt;your-uid&gt;</code> from the Firebase console.
           </li>
           <li>
-            <strong>Third parties.</strong> The app loads the{" "}
-            <em>Inter</em> typeface from Google Fonts. No other third-party
-            services are used. The site is served from GitHub Pages.
+            <strong>Event lifecycle.</strong> The Firestore <code>users</code>{" "}
+            collection will be purged by the organisers within 14 days of the
+            offsite ending — consistent with GDPR storage-limitation
+            principles.
           </li>
           <li>
-            <strong>Event lifecycle.</strong> Because the app is local-only,
-            there is no central dataset for organisers to retain. If a future
-            version adds cloud sync, any centrally-stored participant data
-            would be purged within 14 days of the offsite ending — consistent
-            with GDPR storage-limitation principles.
+            <strong>Third parties.</strong> The app uses Google Cloud
+            (Firebase Auth + Firestore, EU region) for sync, and loads the{" "}
+            <em>Inter</em> typeface from Google Fonts. The site itself is
+            served from GitHub Pages. No advertising, analytics, or
+            third-party trackers are loaded.
           </li>
         </ul>
       </>
@@ -214,9 +216,10 @@ const SECTIONS: Section[] = [
             Can I see other people's steps?
           </dt>
           <dd className="mt-1">
-            The Leaderboard and Teams views show aggregate seed data plus your
-            own contribution to your team — designed to spark friendly
-            competition. No personal data leaves your device.
+            Yes — the Leaderboard reflects everyone who's signed in via the
+            shared Firestore project, in real time. The Teams view aggregates
+            those numbers per team. Only display name, team, and step counts
+            are shared.
           </dd>
         </div>
         <div>
@@ -224,9 +227,21 @@ const SECTIONS: Section[] = [
             What happens to my data after the offsite?
           </dt>
           <dd className="mt-1">
-            Nothing is stored on a server, so there's nothing for organisers to
-            purge. Use "Reset all data" on the Profile screen, or clear this
-            site's storage in your browser, to remove everything immediately.
+            The cloud-stored copy in Firestore will be purged by the
+            organisers within 14 days of the offsite ending. Local-device
+            data can be wiped any time from "Reset all data" on the Profile
+            screen, or by clearing this site's storage in your browser.
+          </dd>
+        </div>
+        <div>
+          <dt className="font-medium" style={{ color: INK }}>
+            What if I lose Wi-Fi at the venue?
+          </dt>
+          <dd className="mt-1">
+            No problem. The app saves new step entries locally and pushes
+            them to the cloud automatically the moment you reconnect. The
+            "Cloud sync" indicator on the Profile screen shows the current
+            state (Synced / Offline — saving locally / Connecting…).
           </dd>
         </div>
         <div>
@@ -234,8 +249,11 @@ const SECTIONS: Section[] = [
             I cleared my browser, can my data be recovered?
           </dt>
           <dd className="mt-1">
-            No — local-first means data lives only in your browser. Clearing it
-            permanently erases your history. That's a feature, not a bug.
+            Not from this device — clearing browser storage also discards
+            the cached anonymous credential, so a fresh visit starts a new
+            anonymous identity. Your previously-synced row will remain in
+            Firestore until the post-offsite purge, but this device will no
+            longer be linked to it.
           </dd>
         </div>
         <div>
@@ -252,9 +270,11 @@ const SECTIONS: Section[] = [
             Will my steps sync across devices?
           </dt>
           <dd className="mt-1">
-            Not in this version. Each device keeps its own local log. If you
-            switch devices during the week, log your steps on the device you
-            use most.
+            Not automatically. Anonymous sign-in is per-browser, so each
+            device starts a new identity and shows up as a separate row in
+            the leaderboard. For consistency, log your steps on the device
+            you use most. (A future version could add proper sign-in for
+            cross-device sync.)
           </dd>
         </div>
         <div>
