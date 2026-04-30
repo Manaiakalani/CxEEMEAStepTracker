@@ -47,6 +47,12 @@ type Persisted = {
   /** Step totals keyed by ISO date. */
   entries: Record<string, number>;
   activity: ActivityEntry[];
+  /**
+   * True once the user has completed (or skipped) the welcome flow. Existing
+   * v1 saves that lack this field are migrated to `true` on load — they
+   * predate onboarding and shouldn't be interrupted by a sudden modal.
+   */
+  onboarded: boolean;
 };
 
 const STORAGE_KEY = "alpine-step-tracker:v1";
@@ -92,6 +98,7 @@ function buildInitial(): Persisted {
     profile: { ...DEFAULT_PROFILE },
     entries,
     activity: [],
+    onboarded: false,
   };
 }
 
@@ -155,6 +162,10 @@ function loadInitial(): Persisted {
       profile: parsed.profile,
       entries: { ...parsed.entries },
       activity: parsed.activity,
+      // Pre-onboarding saves: assume they've been using the app already,
+      // don't surprise them with a welcome modal.
+      onboarded:
+        typeof parsed.onboarded === "boolean" ? parsed.onboarded : true,
     };
     // Make sure today's key exists (rolls naturally each new day).
     const today = isoDate(new Date());
@@ -195,6 +206,7 @@ type StoreValue = {
   cloudStatus: CloudStatus;
   cloudUid: string | null;
   walkers: LeaderboardEntry[];
+  onboarded: boolean;
   setTab: (t: TabKey) => void;
   addSteps: (amount: number, source?: "manual" | "quick") => void;
   setProfile: (p: Partial<Profile>) => void;
@@ -202,6 +214,7 @@ type StoreValue = {
   setTheme: (t: ThemeMode) => void;
   resetWeek: () => void;
   resetAll: () => void;
+  completeOnboarding: (p: Profile) => void;
 };
 
 const StoreContext = createContext<StoreValue | null>(null);
@@ -314,7 +327,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const resetAll = useCallback(() => {
     const fresh = buildInitial();
-    setState(fresh);
+    // After a full reset, send the user back through onboarding so the
+    // seed defaults (Anja / Threat Protection) aren't silently kept.
+    setState({ ...fresh, onboarded: false });
+  }, []);
+
+  const completeOnboarding = useCallback((p: Profile) => {
+    setState((prev) => ({
+      ...prev,
+      profile: {
+        name: p.name.trim() || prev.profile.name,
+        team: p.team || prev.profile.team,
+        goal: Math.max(1000, Math.round(p.goal)),
+      },
+      onboarded: true,
+    }));
   }, []);
 
   // Cloud sync: always on when Firebase is configured. We track auth via
@@ -430,6 +457,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       cloudStatus,
       cloudUid,
       walkers,
+      onboarded: state.onboarded,
       setTab,
       addSteps,
       setProfile,
@@ -437,6 +465,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setTheme,
       resetWeek,
       resetAll,
+      completeOnboarding,
     }),
     [
       state,
@@ -453,6 +482,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setTheme,
       resetWeek,
       resetAll,
+      completeOnboarding,
     ],
   );
 
@@ -481,8 +511,14 @@ export type WalkerRow = {
 
 /**
  * Compute the per-walker leaderboard from the live Firestore collection.
+ *
  * Walkers without a name (haven't customised their profile yet) are filtered
  * out so they don't crowd the offsite leaderboard with anonymous rows.
+ *
+ * Rows are **deduplicated by name + team** (case-insensitive). This is how
+ * we collapse cross-device duplicates: if Anja-on-laptop and Anja-on-phone
+ * sync as two anonymous Firestore docs, they share the same name+team and
+ * appear as a single combined row whose total is the sum of both devices.
  *
  * The current user is **always** included even if Firestore hasn't echoed
  * their snapshot back yet (network races on first load) — we synthesise a
@@ -495,30 +531,70 @@ export function walkerLeaderboard(
   myTeam: string,
   myEntries: Record<string, number>,
 ): WalkerRow[] {
-  const rows: WalkerRow[] = [];
+  const groups = new Map<
+    string,
+    { name: string; team: string; uid: string; steps: number; mine: boolean }
+  >();
   let sawSelf = false;
+
   for (const w of walkers) {
     const trimmed = (w.name ?? "").trim();
     if (!trimmed) continue;
-    const mine = !!myUid && w.uid === myUid;
-    if (mine) sawSelf = true;
-    rows.push({
-      uid: w.uid,
-      name: trimmed,
-      team: w.team,
-      // Prefer locally-known entries for `mine` so the count is up-to-date
-      // even before the debounced sync round-trips.
-      steps: weekTotalFor(mine ? myEntries : w.entries),
-      mine,
-    });
+    const teamTrimmed = (w.team ?? "").trim();
+    const key = `${trimmed.toLowerCase()}|${teamTrimmed.toLowerCase()}`;
+    const isMineDoc = !!myUid && w.uid === myUid;
+    if (isMineDoc) sawSelf = true;
+    // Prefer locally-known entries for the current user's own doc so the
+    // count is up-to-date even before the debounced sync round-trips.
+    const docSteps = weekTotalFor(isMineDoc ? myEntries : w.entries);
+    const existing = groups.get(key);
+    if (existing) {
+      existing.steps += docSteps;
+      if (isMineDoc) {
+        existing.mine = true;
+        existing.uid = w.uid;
+      }
+    } else {
+      groups.set(key, {
+        name: trimmed,
+        team: teamTrimmed,
+        uid: w.uid,
+        steps: docSteps,
+        mine: isMineDoc,
+      });
+    }
   }
-  if (myUid && !sawSelf && myName.trim()) {
+
+  if (myUid && myName.trim()) {
+    const myKey = `${myName.trim().toLowerCase()}|${myTeam.trim().toLowerCase()}`;
+    const existing = groups.get(myKey);
+    if (!existing && !sawSelf) {
+      // Firestore hasn't echoed our snapshot back yet — synthesise a row
+      // so the user sees themselves immediately on first load.
+      groups.set(myKey, {
+        name: myName.trim(),
+        team: myTeam,
+        uid: myUid,
+        steps: weekTotalFor(myEntries),
+        mine: true,
+      });
+    } else if (existing && !existing.mine) {
+      // We share name+team with a matching cloud row but Firestore hasn't
+      // linked our specific UID yet — claim the merged row as ours so the
+      // "You" pill shows correctly.
+      existing.mine = true;
+      existing.uid = myUid;
+    }
+  }
+
+  const rows: WalkerRow[] = [];
+  for (const g of groups.values()) {
     rows.push({
-      uid: myUid,
-      name: myName,
-      team: myTeam,
-      steps: weekTotalFor(myEntries),
-      mine: true,
+      uid: g.uid,
+      name: g.name,
+      team: g.team,
+      steps: g.steps,
+      mine: g.mine,
     });
   }
   rows.sort((a, b) => b.steps - a.steps);

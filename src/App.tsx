@@ -1,6 +1,7 @@
 import { StoreProvider, useStore } from "./store";
 import { TopNav } from "./components/TopNav";
 import { Footer } from "./components/Footer";
+import { OnboardingModal } from "./components/OnboardingModal";
 import { DashboardPage } from "./pages/DashboardPage";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { ProfilePage } from "./pages/ProfilePage";
@@ -31,6 +32,7 @@ export function App() {
         </main>
         <Footer />
       </div>
+      <OnboardingModal />
     </StoreProvider>
   );
 }

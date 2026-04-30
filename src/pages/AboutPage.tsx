@@ -182,10 +182,26 @@ const SECTIONS: Section[] = [
             Will my steps sync across devices?
           </dt>
           <dd className="mt-1">
-            Not automatically. Anonymous sign-in is per-browser, so your
-            phone and laptop currently show up as separate rows. Pick one
-            device for logging and stick to it — or watch this space, a
-            cross-device flow is on the way.
+            Sort of — and intentionally simply. Each browser signs in
+            anonymously, so logging on phone <em>and</em> laptop creates two
+            separate cloud rows. The leaderboard merges anyone with the same
+            name + team into one combined row, so your total reflects every
+            device you walked on. Heads up: two real people sharing a first
+            name <em>and</em> a team would also merge — pick a slightly
+            different display name if that's you.
+          </dd>
+        </div>
+        <div>
+          <dt className="font-medium" style={{ color: INK }}>
+            I used the tracker on another device — can I pick up where I
+            left off?
+          </dt>
+          <dd className="mt-1">
+            On your first visit on a new device, the welcome flow shows any
+            walker already on the leaderboard with the same name and offers
+            to join you to that row. Your steps from that point on combine
+            with the existing total. Past per-day entries stay on the
+            original device.
           </dd>
         </div>
         <div>
