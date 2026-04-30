@@ -10,7 +10,7 @@ export const CHALLENGES: ChallengeDef[] = [
     id: "frauenkirche",
     name: "Frauenkirche Tower Climb",
     story:
-      "Match Munich's twin onion-domed towers — 98 m tall, watching over the Altstadt since 1488.",
+      "Match Munich's twin onion-domed towers, 98 m tall, watching over the Altstadt since 1488.",
     target: 10000,
   },
   {
@@ -23,7 +23,7 @@ export const CHALLENGES: ChallengeDef[] = [
   {
     id: "englischer-garten",
     name: "Englischer Garten Grand Loop",
-    story: "Circle the 375-hectare urban park — yes, larger than Central Park.",
+    story: "Circle the 375-hectare urban park. Yes, larger than Central Park.",
     target: 14000,
   },
   {
@@ -51,28 +51,28 @@ export const CHALLENGES: ChallengeDef[] = [
     id: "ms-munich-mile",
     name: "Microsoft München Mile",
     story:
-      "Marienplatz up to Microsoft's Munich home in Schwabing — Walter-Gropius-Straße, where the local CxE team lives day to day.",
+      "Marienplatz up to Microsoft's Munich home in Schwabing on Walter-Gropius-Straße, where the local CxE team lives day to day and the offsite is hosted.",
     target: 7500,
   },
   {
     id: "azure-west-europe",
     name: "Azure West Europe Loop",
     story:
-      "A nod to the region powering half of EMEA — circle through the city as if you were tracing a packet across the West Europe datacenter.",
+      "A nod to the region powering half of EMEA. Circle through the city as if you were tracing a packet across the West Europe datacenter.",
     target: 9000,
   },
   {
     id: "copilot-cadence",
     name: "Copilot Cadence",
     story:
-      "Walking-meeting pace along the Isar. AirPods optional, ideas required — every stride is a prompt, every break is a refinement.",
+      "Walking-meeting pace along the Isar. AirPods optional, ideas required. Every stride is a prompt, every break is a refinement.",
     target: 8000,
   },
   {
     id: "cxe-customer-connect",
     name: "CxE Customer Connect",
     story:
-      "The classic walking 1:1 — long enough for a real conversation, short enough to make the next session. The route is the meeting.",
+      "The classic walking 1:1: long enough for a real conversation, short enough to make the next session. The route is the meeting.",
     target: 11000,
   },
 ];

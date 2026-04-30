@@ -146,7 +146,7 @@ export function ProfilePage() {
               On the wrong team?
             </h2>
             <p className="text-[13.5px] mt-1" style={{ color: MUTED }}>
-              Picked one by accident — or your team changed? Switch here and
+              Picked one by accident, or your team changed? Switch here and
               we'll move your contribution to the new team's total.
             </p>
           </div>
@@ -250,7 +250,7 @@ export function ProfilePage() {
               automatically to the shared offsite Firestore project so the
               live leaderboard reflects everyone in real time. If your
               connection drops, new entries are saved on this device and pushed
-              to the cloud as soon as you're back online — no action needed.
+              to the cloud as soon as you're back online. No action needed.
             </p>
             <CloudStatusPill status={cloudStatus} />
             {cloudStatus === "unconfigured" ? (
@@ -263,7 +263,7 @@ export function ProfilePage() {
                 }}
               >
                 Cloud sync isn't configured for this build yet. Your data is
-                still safe on this device — ask the offsite organiser to
+                still safe on this device. Ask the offsite organiser to
                 finish the Firebase setup.
               </div>
             ) : null}
@@ -277,7 +277,7 @@ export function ProfilePage() {
                 }}
               >
                 We couldn't reach the cloud just now. Your steps are saved
-                locally and we'll retry automatically — no action needed.
+                locally and we'll retry automatically. No action needed.
               </div>
             ) : null}
           </div>
@@ -456,7 +456,7 @@ function CloudStatusPill({ status }: { status: CloudStatus }) {
       dotColor = "#2E7D5A"; // success green
       break;
     case "offline":
-      label = "Offline — saving locally";
+      label = "Offline · saving locally";
       dotColor = "#C97A1A"; // warn amber
       break;
     case "connecting":

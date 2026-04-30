@@ -1,7 +1,7 @@
-import { Cloud } from "lucide-react";
+import { CalendarDays, Cloud } from "lucide-react";
 import { MountainSilhouette } from "./MountainSilhouette";
 import { useStore } from "../store";
-import { BAYERN, HAIRLINE, INK, MUTED } from "../theme";
+import { BAYERN, HAIRLINE, INK, MEADOW, MEADOW_SOFT, MUTED } from "../theme";
 import { formatGreetingDate, formatNumber } from "../lib/format";
 
 export function Hero() {
@@ -9,7 +9,7 @@ export function Hero() {
   const remaining = Math.max(0, profile.goal - todaySteps);
   const subtitle =
     remaining === 0
-      ? "You've hit today's goal — bonus steps build your team's lead."
+      ? "You've hit today's goal. Bonus steps build your team's lead."
       : remaining <= 1500
         ? `You're ${formatNumber(remaining)} steps from today's goal. A loop around the Marienplatz should do it.`
         : `${formatNumber(remaining)} steps to today's goal. Try the riverside path along the Isar.`;
@@ -41,7 +41,17 @@ export function Hero() {
               {subtitle}
             </p>
           </div>
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex items-center gap-2 pt-2 flex-wrap">
+            <span
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-[12.5px] font-medium tracking-tight"
+              style={{
+                background: MEADOW_SOFT,
+                color: MEADOW,
+              }}
+            >
+              <CalendarDays className="w-3.5 h-3.5" strokeWidth={1.75} />
+              11–14 May · Microsoft München
+            </span>
             <div
               className="flex items-center gap-2 h-9 px-3 rounded-full border surface-translucent-soft"
               style={{ borderColor: HAIRLINE }}

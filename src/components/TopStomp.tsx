@@ -98,7 +98,7 @@ export function TopStomp() {
                 className="rounded-lg p-5 text-[13.5px]"
                 style={{ border: `1px solid ${HAIRLINE}`, color: MUTED }}
               >
-                No walkers logged yet — be the first to add some steps.
+                No walkers logged yet. Be the first to add some steps.
               </div>
             ) : (
               <ol className="grid grid-cols-1 sm:grid-cols-3 gap-3">

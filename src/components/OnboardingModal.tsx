@@ -340,7 +340,7 @@ export function OnboardingModal() {
                 Pick a daily goal.
               </h2>
               <p className="text-[14px] mt-2" style={{ color: MUTED }}>
-                Something realistic for an offsite week — you can change it
+                Something realistic for an offsite week. You can change it
                 anytime.
               </p>
               <ul className="grid grid-cols-5 gap-2 mt-5">

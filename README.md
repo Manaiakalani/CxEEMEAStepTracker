@@ -1,13 +1,13 @@
 # CxE EMEA Step Tracker
 
-A lightweight, Munich-themed step-tracking web app for the **CxE EMEA Offsite 2026** in München. Log your steps, climb landmark-inspired challenges, race your teammates on the leaderboard, and keep the offsite spirit alive between sessions.
+A lightweight, Munich-themed step-tracking web app for the **CxE EMEA Offsite 2026**, running **11–14 May 2026** at the **Microsoft München office** (Walter-Gropius-Straße, Schwabing). Log your steps, climb landmark-inspired challenges, race your teammates on the leaderboard, and keep the offsite spirit alive between sessions.
 
-> _"Match Munich's twin onion-domed towers — 98 m tall, watching over the Altstadt since 1488."_
+> _"Match Munich's twin onion-domed towers, 98 m tall, watching over the Altstadt since 1488."_
 
 ## ✨ Features
 
 - **Dashboard** — daily progress ring, goal tracking, weekly chart, today's focus, and quick-entry buttons.
-- **Challenges** — Munich landmark-inspired step goals (Frauenkirche, Viktualienmarkt, Englischer Garten, Isar, Marienplatz, and more).
+- **Challenges** — Munich landmark-inspired step goals (Frauenkirche, Viktualienmarkt, Englischer Garten, Isar, Marienplatz, Microsoft München Mile, and more).
 - **Leaderboard** — see how you stack up against fellow attendees.
 - **Teams** — team-by-team breakdown for friendly inter-team competition.
 - **Profile** — set your name, team, and personal daily goal.
@@ -95,8 +95,8 @@ region (`eur3 / europe-west`). Project: `cxeemeastep`.
 - **Third parties.** Google Cloud (Firebase Auth + Firestore, EU region)
   for sync; Google Fonts for the Inter typeface; GitHub Pages for hosting.
 
-A more detailed write-up — privacy notice, Munich theme days, suggested
-routes, and an FAQ — is available inside the app on the **About** tab.
+A more detailed write-up (privacy notice, suggested routes, and FAQ) is
+available inside the app on the **About** tab.
 
 ## ☁️ Cloud sync
 

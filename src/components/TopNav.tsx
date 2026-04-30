@@ -39,7 +39,7 @@ export function TopNav() {
             </span>
           </span>
           <span className="text-[13px] font-medium tracking-tight hidden sm:inline">
-            CxE EMEA Offsite 2026 — Step Tracker
+            CxE EMEA Offsite 2026 · Step Tracker
           </span>
           <span className="text-[13px] font-medium tracking-tight sm:hidden">
             Step Tracker
