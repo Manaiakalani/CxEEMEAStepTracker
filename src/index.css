@@ -102,10 +102,27 @@ body {
 button {
   font-family: inherit;
   cursor: pointer;
+  /* Snappier taps on iOS / Android: skip the 300ms double-tap-zoom delay
+     and the gray tap highlight on solid buttons. */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  -webkit-tap-highlight-color: transparent;
 }
 
 input {
   font-family: inherit;
+  /* Prevent iOS Safari from auto-zooming when an input < 16px is focused. */
+  font-size: 16px;
+}
+
+/* Honour iOS safe-area on notched devices so the sticky nav and footer
+   don't hug the dynamic island / home indicator. */
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* Theme-aware utility classes -------------------------------------------- */
