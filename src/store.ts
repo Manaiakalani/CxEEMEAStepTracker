@@ -10,7 +10,7 @@ import {
 } from "react";
 import { createElement } from "react";
 import { isoDate, lastNDays } from "./lib/format";
-import { SEED_PRIOR_DAYS, TEAMS } from "./data";
+import { LEGACY_SEED_PRIOR_DAYS, TEAMS } from "./data";
 import { isFirebaseConfigured } from "./firebase-config";
 import {
   ensureAnonUser,
@@ -82,17 +82,10 @@ const DEFAULT_PROFILE: Profile = {
 
 function buildInitial(): Persisted {
   const entries: Record<string, number> = {};
-  // Seed previous 6 days (Mon–Sat if today is Sun).
+  // Fresh installs start at 0 across the entire 7-day window — no demo
+  // values. The dashboard fills in real numbers as the user logs steps.
   const days = lastNDays(7);
-  // days has 7 entries — last is today, first is 6 days ago.
-  for (let i = 0; i < days.length - 1; i++) {
-    const seed = SEED_PRIOR_DAYS[i];
-    if (typeof seed === "number") {
-      entries[isoDate(days[i])] = seed;
-    }
-  }
-  // Today starts at 0.
-  entries[isoDate(days[days.length - 1])] = 0;
+  for (const d of days) entries[isoDate(d)] = 0;
   return {
     version: 1,
     profile: { ...DEFAULT_PROFILE },
@@ -138,10 +131,10 @@ function isValidActivity(a: unknown): a is ActivityEntry[] {
 }
 
 /**
- * Returns true if the entries map looks like an untouched fresh-install
- * seed: today is 0, and the prior 6 days hold the exact SEED_PRIOR_DAYS
- * values in order. Used as a one-time migration guard so old installs
- * don't keep pushing demo data to Firestore.
+ * Returns true if the entries map looks like an untouched legacy seed
+ * from older builds: today is 0, and the prior 6 days hold the exact
+ * LEGACY_SEED_PRIOR_DAYS values in order. Used as a one-time migration
+ * guard so old installs don't keep pushing demo data to Firestore.
  */
 function looksLikeUntouchedSeed(entries: Record<string, number>): boolean {
   const days = lastNDays(7);
@@ -149,7 +142,7 @@ function looksLikeUntouchedSeed(entries: Record<string, number>): boolean {
   if ((entries[today] ?? 0) !== 0) return false;
   for (let i = 0; i < 6; i++) {
     const k = isoDate(days[i]);
-    if (entries[k] !== SEED_PRIOR_DAYS[i]) return false;
+    if (entries[k] !== LEGACY_SEED_PRIOR_DAYS[i]) return false;
   }
   return true;
 }
@@ -189,7 +182,7 @@ function loadInitial(): Persisted {
     // but never actually walked. Zero out the seed values so they don't
     // re-pollute Firestore on the next sync. We deliberately only run this
     // when `onboarded` was missing (i.e. an older save) and the values
-    // match the SEED_PRIOR_DAYS sequence — narrow enough to never touch
+    // match the LEGACY_SEED_PRIOR_DAYS sequence — narrow enough to never touch
     // legitimate activity.
     if (typeof parsed.onboarded !== "boolean" && looksLikeUntouchedSeed(safe.entries)) {
       const days = lastNDays(7);
