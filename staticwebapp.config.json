@@ -4,7 +4,9 @@
     "exclude": ["/assets/*", "/*.{css,js,ico,png,jpg,jpeg,gif,svg,webp,woff,woff2,ttf,eot,map,json,txt}"]
   },
   "mimeTypes": {
-    ".json": "application/json"
+    ".json": "application/json",
+    ".webmanifest": "application/manifest+json",
+    ".svg": "image/svg+xml"
   },
   "globalHeaders": {
     "Cache-Control": "no-cache"
