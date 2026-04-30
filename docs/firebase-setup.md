@@ -80,8 +80,14 @@ for forks. Keep them in env vars and lock them down at the platform layer:
   [Google Cloud Console → APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials?project=cxeemeastep),
   open the Firebase browser key and set **Application restrictions →
   Websites** to:
-  - `https://manaiakalani.github.io/CxEEMEAStepTracker/*`
-  - `http://localhost:5173/*` (for local dev)
+  - `https://manaiakalani.github.io/*` ← **required** (browsers send the
+    bare origin as `Referer` due to the default
+    `strict-origin-when-cross-origin` policy, so a narrower pattern like
+    `https://manaiakalani.github.io/CxEEMEAStepTracker/*` will reject every
+    real browser request with HTTP 403)
+  - `https://manaiakalani.github.io` (some browsers send Referer with no
+    trailing slash)
+  - `http://localhost:5173/*` and `http://localhost:5173` (local dev)
 - **API restrictions** — Limit the key to the APIs the app actually needs:
   Identity Toolkit API, Cloud Firestore API, Firebase Installations API,
   Token Service API.
@@ -180,8 +186,21 @@ consistent with GDPR storage-limitation principles.
 ## 7. Troubleshooting
 
 **"Cloud not configured" pill on Profile.**
-`src/firebase-config.ts` still has empty `apiKey` or `appId`. Fill in the
-values from the Firebase Console (step 3) and rebuild / redeploy.
+The `VITE_FIREBASE_*` environment variables aren't reaching the build. For
+local dev, copy `.env.example` to `.env.local` and fill it in. For the
+GitHub Pages build, make sure the matching repo secrets exist (Settings →
+Secrets and variables → Actions) and re-run the deploy workflow.
+
+**"Retrying…" pill with `auth/network-request-failed` or `Requests from referer … are blocked` in the browser console.**
+The API key's HTTP-referrer restriction is too narrow. Browsers default to
+`Referrer-Policy: strict-origin-when-cross-origin`, which sends only the
+*origin* (`https://manaiakalani.github.io/`) as `Referer`, **not** the full
+path. A pattern like `https://manaiakalani.github.io/CxEEMEAStepTracker/*`
+will therefore reject every real browser request with HTTP 403. Fix by
+adding `https://manaiakalani.github.io/*` (and the bare-origin variant) to
+the allowed websites in
+[GCP Credentials](https://console.cloud.google.com/apis/credentials?project=cxeemeastep).
+Changes propagate within a couple of minutes.
 
 **"Connecting…" never resolves; console shows `auth/admin-restricted-operation`.**
 Anonymous authentication isn't enabled. Re-do step 2.
