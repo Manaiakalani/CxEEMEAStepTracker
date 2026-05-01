@@ -215,11 +215,35 @@ body {
   filter: brightness(1.1);
 }
 
+@keyframes brand-ridge-pan {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-28px);
+  }
+}
+
+.brand-ridge {
+  animation: brand-ridge-pan 6s linear infinite;
+  animation-play-state: paused;
+  will-change: transform;
+}
+
+.brand-ridge-trigger:hover .brand-ridge,
+.brand-ridge-trigger:focus-visible .brand-ridge,
+.brand-ridge-trigger:active .brand-ridge {
+  animation-play-state: running;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+  .brand-ridge {
+    animation: none !important;
   }
 }

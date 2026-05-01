@@ -39,12 +39,12 @@ export function TopNav() {
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10 flex items-center justify-between h-14">
         <button
           onClick={() => setTab("dashboard")}
-          className="group flex items-center gap-2 h-11 -ml-1 pl-1 pr-2 rounded-md focus:outline-none focus-visible:ring-2"
+          className="brand-ridge-trigger group flex items-center gap-2 h-11 -ml-1 pl-1 pr-2 rounded-md focus:outline-none focus-visible:ring-2"
           style={{ color: INK, ["--tw-ring-color" as any]: BAYERN }}
           aria-label="Step Tracker home"
         >
           <span
-            className="w-7 h-7 rounded-md flex items-center justify-center shadow-sm transition-transform duration-200 ease-out motion-safe:group-hover:-translate-y-px motion-safe:group-active:translate-y-0"
+            className="w-7 h-7 rounded-md flex items-center justify-center overflow-hidden shadow-sm transition-transform duration-200 ease-out motion-safe:group-hover:-translate-y-px motion-safe:group-active:translate-y-0"
             style={{
               background:
                 "linear-gradient(160deg, #1F75B8 0%, #114F84 100%)",
@@ -55,8 +55,8 @@ export function TopNav() {
           >
             <svg
               viewBox="0 0 28 28"
-              width="20"
-              height="20"
+              width="28"
+              height="28"
               fill="none"
               stroke="none"
             >
@@ -66,29 +66,42 @@ export function TopNav() {
                   <stop offset="100%" stopColor="#E8F0F8" />
                 </linearGradient>
               </defs>
-              {/* Alpine ridge — three peaks, asymmetric, echoing the favicon */}
-              <path
-                d="M2 22 L9 14 L13 18 L18 9 L26 22 Z"
-                fill="url(#nav-snow)"
-              />
-              {/* Snowy shoulder shadow on the smaller peak */}
-              <path
-                d="M9 14 L7.4 16 L9 16.5 L10.6 16 Z"
-                fill="#114F84"
-                opacity="0.22"
-              />
-              {/* Alpenglow tint on the tallest peak's right face */}
-              <path
-                d="M18 9 L22 15.6 L26 22 L18 12 Z"
-                fill="#F4A45C"
-                opacity="0.32"
-              />
-              {/* Tiny snow cap highlight */}
-              <path
-                d="M18 9 L16.6 11 L18 11.5 L19.4 11 Z"
-                fill="#114F84"
-                opacity="0.22"
-              />
+              {/*
+                Two identical 28-wide ridge copies tiled side by side. CSS
+                keyframe `brand-ridge-pan` translates the inner <g> from 0
+                to -28px on hover/focus, so when copy 2 lands where copy 1
+                was the loop is seam-free. Animation play-state is paused
+                until the brand-ridge-trigger element is hovered.
+              */}
+              <g className="brand-ridge">
+                {[0, 28].map((dx) => (
+                  <g key={dx} transform={`translate(${dx} 0)`}>
+                    {/* Alpine ridge — three peaks, asymmetric */}
+                    <path
+                      d="M0,22 L5,16 L9,12 L13,17 L18,8 L22,15 L25,18 L28,22 Z"
+                      fill="url(#nav-snow)"
+                    />
+                    {/* Snowy shoulder shadow on the small peak */}
+                    <path
+                      d="M9,12 L8,14 L9,14.5 L10,14 Z"
+                      fill="#114F84"
+                      opacity="0.22"
+                    />
+                    {/* Alpenglow tint on the tallest peak's right face */}
+                    <path
+                      d="M18,8 L22,15 L25,18 L28,22 L18,11 Z"
+                      fill="#F4A45C"
+                      opacity="0.32"
+                    />
+                    {/* Snow cap highlight on the tallest peak */}
+                    <path
+                      d="M18,8 L17,10 L18,10.5 L19,10 Z"
+                      fill="#114F84"
+                      opacity="0.22"
+                    />
+                  </g>
+                ))}
+              </g>
             </svg>
           </span>
           <span className="text-[13px] font-medium tracking-tight hidden sm:inline">
