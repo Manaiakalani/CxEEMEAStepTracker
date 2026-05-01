@@ -7,13 +7,26 @@ import {
   Moon,
 } from "lucide-react";
 import { useStore, type TabKey } from "../store";
-import { BAYERN, HAIRLINE, INK, MUTED } from "../theme";
+import {
+  ALPENGLOW,
+  BAYERN,
+  GOLD,
+  HAIRLINE,
+  INK,
+  MEADOW,
+  MUTED,
+} from "../theme";
 
-const ITEMS: { key: TabKey; label: string; icon: typeof LayoutDashboard }[] = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "leaderboard", label: "Leaderboard", icon: Trophy },
-  { key: "profile", label: "Profile", icon: UserIcon },
-  { key: "about", label: "About", icon: Info },
+const ITEMS: {
+  key: TabKey;
+  label: string;
+  icon: typeof LayoutDashboard;
+  color: string;
+}[] = [
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, color: BAYERN },
+  { key: "leaderboard", label: "Leaderboard", icon: Trophy, color: GOLD },
+  { key: "profile", label: "Profile", icon: UserIcon, color: MEADOW },
+  { key: "about", label: "About", icon: Info, color: ALPENGLOW },
 ];
 
 export function TopNav() {
@@ -98,12 +111,16 @@ export function TopNav() {
                   aria-label={it.label}
                   aria-current={active ? "page" : undefined}
                 >
-                  <Icon className="w-4 h-4" strokeWidth={1.5} />
+                  <Icon
+                    className="w-4 h-4"
+                    strokeWidth={1.75}
+                    style={{ color: it.color }}
+                  />
                   <span className="hidden sm:inline">{it.label}</span>
                   {active && (
                     <span
                       className="absolute left-3 right-3 bottom-0 h-[2px]"
-                      style={{ background: BAYERN }}
+                      style={{ background: it.color }}
                     />
                   )}
                 </button>
