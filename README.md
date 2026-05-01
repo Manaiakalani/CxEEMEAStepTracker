@@ -5,28 +5,29 @@
 
 🔗 **Live:** <https://gentle-cliff-07e205d03.7.azurestaticapps.net>
 
-A lightweight, Munich-themed step-tracking web app for the **CxE EMEA Offsite 2026**, running **11–14 May 2026** at the **Microsoft München office** (Walter-Gropius-Straße, Schwabing). Log your steps, climb landmark-inspired challenges, race your teammates on the leaderboard, and keep the offsite spirit alive between sessions.
+A lightweight, Munich-themed step-tracking web app for the **CxE EMEA Offsite 2026**, running **11–14 May 2026** at the **Microsoft München office** (Walter-Gropius-Straße, Schwabing). Twelve landmark- and history-inspired challenges, eight teams, a real-time leaderboard, and an always-on cloud sync that keeps the offsite spirit alive between sessions.
 
 > _"Match Munich's twin onion-domed towers, 98 m tall, watching over the Altstadt since 1488."_
 
 ## ✨ Features
 
 - **Dashboard** — daily progress ring, goal tracking, weekly chart, today's focus, and quick-entry buttons.
-- **Challenges** — Munich landmark-inspired step goals (Frauenkirche, Viktualienmarkt, Englischer Garten, Isar, Marienplatz, Microsoft München Mile) plus two stretch challenges drawn from Microsoft EMEA history (MSR Cambridge 1997, Cebit Hannover 1986–2018).
-- **Leaderboard** — team standings _and_ a per-walker view, with a Top Stomp roll-up that aggregates every registered walker.
-- **Profile** — set your name, team, and personal daily goal; switch teams any time.
-- **Always-on cloud sync** — your steps mirror automatically to the shared offsite Firestore project (EU region) for a real-time leaderboard, with offline fallback so nothing is lost when Wi-Fi drops.
-- **Responsive & themed** — Inter typeface, alpine palette, custom mountain silhouette, and a `#1761A0` brand accent.
+- **12 challenges** spanning a 6 k Marienplatz Loop up to a 20 k Hannover Halle Marathon — Munich landmarks (Frauenkirche, Viktualienmarkt, Englischer Garten, Isar, Olympiapark, Microsoft München Mile) plus walking-meeting goals (Copilot Cadence, CxE Customer Connect) and two stretch goals from Microsoft EMEA history (MSR Cambridge 1997, CeBIT Hannover 1986–2018).
+- **8 teams** — _Care / Aleks · UEM / Craig · MTP / Diego · Purview / Nishan · CCP / Mags · Shared Services / Kim · IDNA / Travis · CxE LT_. Per-walker view, per-team standings, and a Total Stomp roll-up.
+- **Profile** — set your name, team, and personal daily goal; switch teams any time and your contribution moves with you.
+- **Always-on cloud sync** — steps mirror automatically to a shared EU server database for the live leaderboard, with offline buffering so nothing is lost when Wi-Fi drops.
+- **Visual system** — Inter typeface, hairline-driven editorial layout, alpine palette, full dark theme, custom mountain silhouette, `#1761A0` brand accent.
+- **Motion** — pointer-driven parallax on the hero ridge (ambient drift on touch), brand glyph pans on hover, tinted tab icons. All collapse under `prefers-reduced-motion`.
 
 ## 🛠 Tech Stack
 
 - [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) (lazy-routed tabs via `React.lazy` + `Suspense`)
 - [Vite 7](https://vitejs.dev/) for dev/build (manual chunks for `firebase` + `react`)
 - [Tailwind CSS 4](https://tailwindcss.com/) (via `@tailwindcss/vite`)
-- [Firebase 12](https://firebase.google.com/) — Anonymous Auth + Firestore (EU `eur3`), persistent IndexedDB cache
+- [Firebase 12](https://firebase.google.com/) — Anonymous Auth + Firestore (EU `eur3`), persistent IndexedDB cache. Anonymous sign-in is referrer-locked to `cxeemeastep.firebaseapp.com`, `cxeemeastep.web.app`, and the SWA host (see `docs/firebase-setup.md` for forks).
 - [lucide-react](https://lucide.dev/) icons
 - [Azure Static Web Apps](https://azure.microsoft.com/products/app-service/static) for hosting + CI/CD
-- React Context + `localStorage` for state persistence
+- React Context for state; localStorage + Firestore IndexedDB for offline persistence
 
 ## 🎨 Design
 
@@ -88,31 +89,34 @@ src/
 
 ## 💾 Data & Privacy (GDPR-friendly)
 
-Anything you enter — display name, team, daily goal, and step counts — is
-kept on this device (`localStorage` + Firestore's IndexedDB cache) **and**
-mirrored to a Firebase Firestore database hosted by Google Cloud in the EU
-region (`eur3 / europe-west`). Project: `cxeemeastep`.
+In short: only display name, team, daily goal, and per-day step counts ever
+leave the device. Each browser is an anonymous random ID. Data lives in the
+EU. The whole walker list is purged within 14 days of the offsite ending.
 
-- **Anonymous sign-in only.** No email, password, or other identity is
-  collected. Each browser receives a stable random UID so your row in the
-  leaderboard can be updated.
-- **Minimal data.** Only display name, team, daily goal, and per-day step
-  counts ever leave the device. No location, IP-derived geo, device
-  fingerprints, analytics, or third-party trackers.
+For developers / forks, the specifics are:
+
+- **Storage.** Local: `localStorage` + Firestore's IndexedDB cache. Remote:
+  Cloud Firestore in the EU `eur3 / europe-west` multi-region under project
+  `cxeemeastep`.
+- **Anonymous sign-in only.** Each browser receives a stable random UID so
+  the leaderboard row can be updated in place. No email, password, or other
+  identity is collected.
+- **Minimal data.** Only the four fields above ever leave the device. No
+  location, IP-derived geo, device fingerprints, analytics, or third-party
+  trackers.
 - **Offline-resilient.** New entries are saved locally and pushed
-  automatically the moment you reconnect — no data loss.
-- **Right to erasure.** The Profile screen offers "Reset week" and "Reset
-  all data" to wipe local state. To remove your row from Firestore, ask the
-  offsite organiser (or project admin) to delete `users/<your-uid>`.
+  automatically when the connection returns — no data loss.
+- **Right to erasure.** "Reset week" / "Reset all data" on Profile clears
+  this device and pushes a cleared snapshot up so the cloud row also
+  blanks. Ask an organiser (or project admin) to remove `users/<uid>`
+  entirely.
 - **Event lifecycle.** The Firestore `users` collection will be purged by
-  the organisers within 14 days of the offsite ending — consistent with
-  GDPR storage-limitation principles.
-- **Third parties.** Google Cloud (Firebase Auth + Firestore, EU region)
-  for sync; Google Fonts for the Inter typeface; Azure Static Web Apps
-  for hosting.
+  the organisers within 14 days of the offsite ending.
+- **Third parties.** Google Cloud (Firebase Auth + Firestore, EU region);
+  Google Fonts (Inter typeface); Azure Static Web Apps (hosting). Nothing
+  else.
 
-A more detailed write-up (privacy notice, suggested routes, and FAQ) is
-available inside the app on the **About** tab.
+The user-facing version of this lives inside the app on the **About** tab.
 
 ## ☁️ Cloud sync
 
@@ -125,8 +129,8 @@ instantly even offline and are flushed to the server automatically once
 connectivity returns. The **Profile → Cloud sync** panel surfaces the
 current state (Synced / Offline — saving locally / Connecting…).
 
-If `firebase-config.ts` is left empty in a fork, the app falls back to a
-purely local experience — no Firebase code talks to the network.
+If a fork doesn't set the `VITE_FIREBASE_*` build variables, the app falls
+back to a purely local experience — no Firebase code talks to the network.
 
 ## 🚢 Hosting
 

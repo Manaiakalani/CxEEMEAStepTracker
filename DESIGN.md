@@ -593,6 +593,16 @@ The few places motion appears:
 - **Theme toggle** — body color and background cross-fade over 200 ms.
 - **Hover on the brand tile** — translates up 1 px over 200 ms with
   the "out" curve. A small physical lift, not a bounce.
+- **Brand glyph pan** — on hover/focus, the snowy ridge inside the
+  brand tile pans horizontally on a seamless 6 s linear loop (two
+  ridge copies tiled at 28 px so it never seams). A second motion
+  axis on the same hit-target as the lift, separating "you can click
+  this" from "this is decorative".
+- **Hero parallax** — two ridge layers in the mountain silhouette
+  ease in opposing directions (back ~+18 px / front ~−10 px) as the
+  pointer moves across the hero. On touch (no fine pointer) the same
+  layers drift continuously on a slow ~14 s sine wave. Transform-only,
+  written via CSS custom properties so React doesn't re-render.
 - **Hover surfaces** — buttons, list rows, and ghost actions tint
   to `surface-hover` over 150 ms. Color only, no transform.
 - **Modal entrance** — the desktop dialog fades in; the mobile bottom
@@ -604,11 +614,16 @@ under `prefers-reduced-motion: reduce`.
 
 ## Iconography
 
-Lucide line icons throughout, drawn at **1.5 px stroke** (1.75 px on
-the accented eyebrows for parity with the wider tracking of the
-label). Icons appear at four sizes — 12 / 14 / 16 / 20 px — and
-they always inherit color from their parent text or pill so that the
-ratio of icon-to-type stays even.
+Lucide line icons throughout, drawn at **1.75 px stroke** (slightly
+heavier than the previous 1.5 to read crisp at 16 px on retina).
+Icons appear at four sizes — 12 / 14 / 16 / 20 px. They inherit
+color from their parent text or pill in most places, with one
+deliberate exception: the four **primary tab icons** in the top
+nav each carry a brand-family tint to give the chrome quick visual
+landmarks — Dashboard = Bayern blue, Leaderboard = Gold, Profile =
+Meadow green, About = Alpenglow. The active underline beneath each
+tab mirrors that same colour. The colour is paired with the label
+(visible from `sm` up) so it's never the only signal.
 
 The brand glyph (top-nav and favicon) is the system's only
 custom-drawn mark: a three-peak Alpine ridge in white snow with a

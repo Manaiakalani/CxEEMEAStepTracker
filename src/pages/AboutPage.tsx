@@ -103,6 +103,21 @@ const SECTIONS: Section[] = [
       <dl className="space-y-5">
         <div>
           <dt className="font-medium" style={{ color: INK }}>
+            Where do these challenges come from?
+          </dt>
+          <dd className="mt-1">
+            The shorter ones are Munich landmarks you can actually walk
+            during the offsite — Frauenkirche, Viktualienmarkt, Englischer
+            Garten, the Isar, Marienplatz, Olympiapark, and the walk up to
+            the Microsoft München office in Schwabing. The longer "stretch"
+            ones are nods to Microsoft EMEA history: the founding of MSR
+            Cambridge in 1997 (18,000 steps along the Backs) and CeBIT at
+            the Hannover Messe, 1986–2018 (20,000 steps across twenty-seven
+            exhibition halls).
+          </dd>
+        </div>
+        <div>
+          <dt className="font-medium" style={{ color: INK }}>
             How are steps counted?
           </dt>
           <dd className="mt-1">
@@ -200,9 +215,10 @@ const SECTIONS: Section[] = [
           </li>
           <li>
             <strong>Erasure.</strong> "Reset week" / "Reset all data" on
-            Profile wipes this device immediately. Ask an organiser to
-            remove your row, or wait: the whole walker list is purged
-            within 14 days of the offsite ending.
+            Profile clears this device immediately and pushes a cleared
+            snapshot up so the cloud row also blanks. Ask an organiser to
+            remove your row entirely, or wait: the whole walker list is
+            purged within 14 days of the offsite ending.
           </li>
           <li>
             <strong>Third parties.</strong> An EU-region cloud database for

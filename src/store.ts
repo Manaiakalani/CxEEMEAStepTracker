@@ -10,7 +10,7 @@ import {
 } from "react";
 import { createElement } from "react";
 import { isoDate, lastNDays } from "./lib/format";
-import { LEGACY_SEED_PRIOR_DAYS, TEAMS } from "./data";
+import { LEGACY_SEED_PRIOR_DAYS, TEAMS, canonicalTeam } from "./data";
 import { isFirebaseConfigured } from "./firebase-config";
 import {
   ensureAnonUser,
@@ -169,7 +169,13 @@ function loadInitial(): Persisted {
     }
     const safe: Persisted = {
       version: 1,
-      profile: parsed.profile,
+      profile: {
+        ...parsed.profile,
+        // Fold legacy team strings ("CARE", "Threat Protection", …)
+        // onto the current canonical roster so existing walkers keep
+        // contributing to team standings after a roster refresh.
+        team: canonicalTeam(parsed.profile.team),
+      },
       entries: { ...parsed.entries },
       activity: parsed.activity,
       // Pre-onboarding saves: assume they've been using the app already,
@@ -335,7 +341,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
 
   const setProfile = useCallback((patch: Partial<Profile>) => {
-    setState((prev) => ({ ...prev, profile: { ...prev.profile, ...patch } }));
+    setState((prev) => {
+      const merged = { ...prev.profile, ...patch };
+      // Clamp goal at the same floor as onboarding so a profile editor
+      // edge case (or a typo) can't push goal=0 to Firestore.
+      if (typeof merged.goal === "number" && Number.isFinite(merged.goal)) {
+        merged.goal = Math.max(1000, Math.round(merged.goal));
+      } else {
+        merged.goal = prev.profile.goal;
+      }
+      // Fold legacy aliases as the user edits — defence in depth so a
+      // value typed/pasted manually never breaks team aggregation.
+      if (typeof patch.team === "string") {
+        merged.team = canonicalTeam(patch.team);
+      }
+      return { ...prev, profile: merged };
+    });
   }, []);
 
   const resetWeek = useCallback(() => {
@@ -350,12 +371,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resetAll = useCallback(() => {
+    // Capture the pre-reset identity so we can clear the cloud row
+    // before the local state's `onboarded:false` gates the sync effect.
+    // Otherwise the existing Firestore doc keeps its old name/team/entries
+    // until the user re-onboards (potentially never).
+    const prev = state;
     const fresh = buildInitial();
-    // After a full reset, send the user back through onboarding so the
-    // empty profile defaults aren't silently kept (and never reach the
-    // cloud — sync is gated on having a real name + team).
     setState({ ...fresh, onboarded: false });
-  }, []);
+    if (
+      isFirebaseConfigured() &&
+      cloudUidRef.current &&
+      prev.profile.name.trim() &&
+      prev.profile.team.trim()
+    ) {
+      void pushUserSnapshot(cloudUidRef.current, {
+        name: prev.profile.name,
+        team: prev.profile.team,
+        goal: prev.profile.goal,
+        entries: fresh.entries,
+      });
+    }
+  }, [state]);
 
   const completeOnboarding = useCallback((p: Profile) => {
     setState((prev) => {
@@ -483,15 +519,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, [state.profile, state.entries, state.onboarded]);
 
-  // Subscribe to the live leaderboard collection. Mount-once: the snapshot
-  // listener stays open for the lifetime of the provider and keeps `walkers`
-  // fresh in real time. Firestore's persistent cache also serves cached
-  // results instantly while offline.
+  // Subscribe to the live leaderboard collection. Re-runs whenever
+  // `cloudUid` flips from null → uid so the snapshot listener doesn't
+  // race anonymous-auth bootstrap (otherwise on slow mobile networks
+  // Firestore evaluates rules with no UID, denies, and the listener
+  // never auto-recovers — leaving the leaderboard empty).
   useEffect(() => {
     if (!isFirebaseConfigured()) return;
+    if (!cloudUid) return;
     const unsub = subscribeLeaderboard((rows) => setWalkers(rows));
     return () => unsub();
-  }, []);
+  }, [cloudUid]);
 
   const todaySteps = state.entries[todayKey] ?? 0;
 
@@ -675,7 +713,12 @@ export function leaderboardWith(
 ) {
   const agg = new Map<string, { steps: number; walkers: number }>();
   for (const w of walkerRows) {
-    const key = (w.team ?? "").trim().toLowerCase();
+    // Fold legacy team strings ("CARE", "Threat Protection", …) onto
+    // the canonical roster before aggregation. Without this, walkers
+    // who haven't visited since the roster refresh would silently drop
+    // out of team standings even though they appear in Total Stomp.
+    const canonical = canonicalTeam(w.team);
+    const key = canonical.trim().toLowerCase();
     if (!key) continue;
     const cur = agg.get(key) ?? { steps: 0, walkers: 0 };
     cur.steps += w.steps;

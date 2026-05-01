@@ -132,7 +132,9 @@ body {
    near the viewport. Big win on the long About page on mobile. */
 .about-section {
   content-visibility: auto;
-  contain-intrinsic-size: 1px 600px;
+  /* Reserve a generous fallback height so scrollbars stay stable while
+     sections are off-screen, and let the browser pick an honest width. */
+  contain-intrinsic-size: auto 800px;
 }
 
 /* Theme-aware utility classes -------------------------------------------- */

@@ -12,6 +12,7 @@ import {
   initializeFirestore,
   limit,
   onSnapshot,
+  orderBy,
   persistentLocalCache,
   persistentMultipleTabManager,
   query,
@@ -118,20 +119,25 @@ export async function pushUserSnapshot(
   const fb = getFirebase();
   if (!fb || !uid) return false;
   try {
-    await setDoc(
-      doc(fb.db, "users", uid),
-      {
-        name: snapshot.name,
-        team: snapshot.team,
-        goal: snapshot.goal,
-        entries: snapshot.entries,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true },
-    );
+    // Note: deliberately no `{ merge: true }`. We always send the full
+    // {name, team, goal, entries} payload, so a full overwrite is the
+    // correct semantics — and avoids Firestore's deep-merge of map
+    // fields (which would otherwise leave stale day-keys in `entries`
+    // forever after a `resetWeek` / `resetAll`).
+    await setDoc(doc(fb.db, "users", uid), {
+      name: snapshot.name,
+      team: snapshot.team,
+      goal: snapshot.goal,
+      entries: snapshot.entries,
+      updatedAt: serverTimestamp(),
+    });
     return true;
-  } catch (err) {
-    console.warn("[cloud-sync] pushUserSnapshot failed:", err);
+  } catch (err: unknown) {
+    // Log only the error code so the user's UID (which Firestore embeds
+    // in the resource path of the full error message) doesn't end up in
+    // the browser console.
+    const code = (err as { code?: string })?.code ?? "unknown";
+    console.warn("[cloud-sync] pushUserSnapshot failed:", code);
     return false;
   }
 }
@@ -142,7 +148,15 @@ export function subscribeLeaderboard(
   const fb = getFirebase();
   if (!fb) return () => {};
   try {
-    const q = query(collection(fb.db, "users"), limit(200));
+    // Order by `updatedAt` so the most recently active walkers ride the
+    // first 200 slots; defensive cap for the unlikely "huge offsite"
+    // case. Docs missing `updatedAt` (shouldn't happen post-fix, but
+    // historically possible) sort last by Firestore's null ordering.
+    const q = query(
+      collection(fb.db, "users"),
+      orderBy("updatedAt", "desc"),
+      limit(200),
+    );
     const unsub = onSnapshot(
       q,
       (snap) => {
@@ -162,13 +176,15 @@ export function subscribeLeaderboard(
         });
         cb(rows);
       },
-      (err) => {
-        console.warn("[cloud-sync] leaderboard subscription error:", err);
+      (err: unknown) => {
+        const code = (err as { code?: string })?.code ?? "unknown";
+        console.warn("[cloud-sync] leaderboard subscription error:", code);
       },
     );
     return unsub;
-  } catch (err) {
-    console.warn("[cloud-sync] subscribeLeaderboard failed:", err);
+  } catch (err: unknown) {
+    const code = (err as { code?: string })?.code ?? "unknown";
+    console.warn("[cloud-sync] subscribeLeaderboard failed:", code);
     return () => {};
   }
 }

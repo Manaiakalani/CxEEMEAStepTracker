@@ -30,13 +30,13 @@ export function Challenges() {
               className="text-[12px] uppercase tracking-[0.18em] mb-3"
               style={{ color: MUTED }}
             >
-              Munich Challenges
+              Offsite Challenges
             </p>
             <h2
               className="text-[22px] sm:text-[26px] font-medium tracking-tight"
               style={{ color: INK }}
             >
-              Walk the city, one landmark at a time.
+              Munich landmarks, then a few from EMEA history.
             </h2>
           </div>
           <button

@@ -342,7 +342,8 @@ export function ProfilePage() {
               Reset your tracker.
             </h2>
             <p className="text-[13.5px] mt-1" style={{ color: MUTED }}>
-              Step data is kept on this device only.
+              Reset clears this device. Your cloud row stays until an
+              organiser removes it or the post-offsite purge runs.
             </p>
           </div>
           <div className="col-span-12 md:col-span-8 flex flex-col gap-3 items-start">

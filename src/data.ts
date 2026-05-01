@@ -116,6 +116,45 @@ export const TEAMS: SeedTeam[] = [
 ];
 
 /**
+ * Legacy team strings from earlier rosters (pre-offsite). When loading a
+ * persisted profile or aggregating cloud rows we fold these onto the
+ * canonical `TEAMS` names so existing walkers don't silently disappear
+ * from the team standings after a roster update. Lookup is
+ * case-insensitive and whitespace-trimmed.
+ */
+export const LEGACY_TEAM_MAP: Record<string, string> = {
+  "care": "Care / Aleks",
+  "threat protection": "MTP / Diego",
+  "mtp": "MTP / Diego",
+  "purview/ces": "Purview / Nishan",
+  "purview / ces": "Purview / Nishan",
+  "purview": "Purview / Nishan",
+  "idna": "IDNA / Travis",
+  "ccp": "CCP / Mags",
+  "shared services": "Shared Services / Kim",
+  "uem": "UEM / Craig",
+  "cxe lt": "CxE LT",
+};
+
+/**
+ * Normalize a raw team string (from local storage or Firestore) to its
+ * canonical `TEAMS` name. If already canonical, returns the original
+ * trimmed value. Unknown teams pass through unchanged so they remain
+ * visible to organisers in raw rows even if they don't aggregate.
+ */
+export function canonicalTeam(raw: string | undefined | null): string {
+  if (!raw) return "";
+  const trimmed = String(raw).trim();
+  if (!trimmed) return "";
+  // Already canonical?
+  for (const t of TEAMS) {
+    if (t.name.toLowerCase() === trimmed.toLowerCase()) return t.name;
+  }
+  const mapped = LEGACY_TEAM_MAP[trimmed.toLowerCase()];
+  return mapped ?? trimmed;
+}
+
+/**
  * Legacy seed values from earlier development builds. The dashboard no
  * longer pre-populates with mock prior-day steps — every fresh install
  * starts at `0` across all 7 days. This array is kept solely so the

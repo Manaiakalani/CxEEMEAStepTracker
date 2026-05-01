@@ -132,7 +132,7 @@ export function TopNav() {
                   <span className="hidden sm:inline">{it.label}</span>
                   {active && (
                     <span
-                      className="absolute left-3 right-3 bottom-0 h-[2px]"
+                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 sm:w-auto sm:left-3 sm:right-3 sm:translate-x-0 h-[2px]"
                       style={{ background: it.color }}
                     />
                   )}
