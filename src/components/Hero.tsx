@@ -15,7 +15,7 @@ export function Hero() {
         : `${formatNumber(remaining)} steps to today's goal. Try the riverside path along the Isar.`;
 
   return (
-    <header className="relative overflow-hidden">
+    <header className="relative overflow-hidden" data-parallax-root>
       <div className="absolute inset-0 hero-gradient" />
       <div className="absolute inset-0 hero-glow" aria-hidden="true" />
       <MountainSilhouette />
