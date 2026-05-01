@@ -83,21 +83,22 @@ export type SeedTeam = {
 };
 
 /**
- * The 9 CxE teams. The canonical list of names + ids used to map team
- * picks in the UI to live aggregated rows in the leaderboard. Step
- * totals and walker counts are derived live from registered walkers
- * (see `leaderboardWith` in store.ts), not stored statically here.
+ * The 8 CxE EMEA Offsite 2026 teams. The canonical list of names + ids
+ * used to map team picks in the UI to live aggregated rows in the
+ * leaderboard. Step totals and walker counts are derived live from
+ * registered walkers (see `leaderboardWith` in store.ts), not stored
+ * statically here. Display name encodes the team lead so the directory
+ * also doubles as a human point-of-contact list.
  */
 export const TEAMS: SeedTeam[] = [
-  { id: "threat-protection", name: "Threat Protection" },
-  { id: "purview-ces", name: "Purview / CES" },
-  { id: "idna", name: "IDNA" },
-  { id: "care", name: "CARE" },
-  { id: "scale-enablement", name: "Scale Enablement" },
-  { id: "ccp", name: "CCP" },
+  { id: "care", name: "Care / Aleks" },
+  { id: "uem", name: "UEM / Craig" },
+  { id: "mtp", name: "MTP / Diego" },
+  { id: "purview", name: "Purview / Nishan" },
+  { id: "ccp", name: "CCP / Mags" },
+  { id: "shared-services", name: "Shared Services / Kim" },
+  { id: "idna", name: "IDNA / Travis" },
   { id: "cxe-lt", name: "CxE LT" },
-  { id: "shared-services", name: "Shared Services" },
-  { id: "management", name: "Management" },
 ];
 
 /**
