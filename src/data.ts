@@ -72,7 +72,7 @@ export const CHALLENGES: ChallengeDef[] = [
     id: "cxe-customer-connect",
     name: "CxE Customer Connect",
     story:
-      "The classic walking 1:1: long enough for a real conversation, short enough to make the next session. The route is the meeting.",
+      "Skip the conf room. A walking 1:1 from Marienplatz to the Isar bridges and back — long enough for the real conversation, short enough to make the next session.",
     target: 11000,
   },
 ];

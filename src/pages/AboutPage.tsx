@@ -191,24 +191,22 @@ const SECTIONS: Section[] = [
         </p>
         <ul>
           <li>
-            <strong>Where it lives.</strong> On this device (browser{" "}
-            <code>localStorage</code> + <code>IndexedDB</code>), mirrored to
-            Firebase Firestore in the EU (<code>europe-west</code>) under
-            project <code>cxeemeastep</code>.
+            <strong>Where it lives.</strong> On your device, with a copy on
+            the offsite's shared server database hosted in the EU.
           </li>
           <li>
             <strong>Who you are to the cloud.</strong> An anonymous random
-            UID per browser. No identity is collected.
+            ID per browser. No identity is collected.
           </li>
           <li>
             <strong>Erasure.</strong> "Reset week" / "Reset all data" on
-            Profile wipes this device immediately. Ask an organiser to remove
-            your Firestore row, or wait: the whole <code>users</code>{" "}
-            collection is purged within 14 days of the offsite ending.
+            Profile wipes this device immediately. Ask an organiser to
+            remove your row, or wait: the whole walker list is purged
+            within 14 days of the offsite ending.
           </li>
           <li>
-            <strong>Third parties.</strong> Google Cloud (Firestore + Auth,
-            EU), Google Fonts (the <em>Inter</em> typeface), and Azure
+            <strong>Third parties.</strong> An EU-region cloud database for
+            sync, Google Fonts (the <em>Inter</em> typeface), and Azure
             Static Web Apps for hosting. Nothing else.
           </li>
         </ul>

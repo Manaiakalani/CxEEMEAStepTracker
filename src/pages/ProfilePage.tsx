@@ -163,8 +163,8 @@ export function ProfilePage() {
               On the wrong team?
             </h2>
             <p className="text-[13.5px] mt-1" style={{ color: MUTED }}>
-              Picked one by accident, or your team changed? Switch here and
-              we'll move your contribution to the new team's total.
+              Picked one by accident? Switch here and we'll move your
+              contribution to the new team's total.
             </p>
           </div>
           <div className="col-span-12 md:col-span-8">
@@ -265,10 +265,10 @@ export function ProfilePage() {
               style={{ color: MUTED }}
             >
               Your display name, team, daily goal, and step counts sync
-              automatically to the shared offsite Firestore project so the
-              live leaderboard reflects everyone in real time. If your
-              connection drops, new entries are saved on this device and pushed
-              to the cloud as soon as you're back online. No action needed.
+              automatically to the shared offsite leaderboard so everyone
+              shows up in real time. If your connection drops, new entries
+              are saved on this device and pushed up the moment you're back
+              online. No action needed.
             </p>
             <CloudStatusPill status={cloudStatus} />
             {cloudStatus === "unconfigured" ? (
