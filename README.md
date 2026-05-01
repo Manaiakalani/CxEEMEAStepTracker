@@ -12,7 +12,7 @@ A lightweight, Munich-themed step-tracking web app for the **CxE EMEA Offsite 20
 ## ✨ Features
 
 - **Dashboard** — daily progress ring, goal tracking, weekly chart, today's focus, and quick-entry buttons.
-- **Challenges** — Munich landmark-inspired step goals (Frauenkirche, Viktualienmarkt, Englischer Garten, Isar, Marienplatz, Microsoft München Mile, and more).
+- **Challenges** — Munich landmark-inspired step goals (Frauenkirche, Viktualienmarkt, Englischer Garten, Isar, Marienplatz, Microsoft München Mile) plus two stretch challenges drawn from Microsoft EMEA history (MSR Cambridge 1997, Cebit Hannover 1986–2018).
 - **Leaderboard** — team standings _and_ a per-walker view, with a Top Stomp roll-up that aggregates every registered walker.
 - **Profile** — set your name, team, and personal daily goal; switch teams any time.
 - **Always-on cloud sync** — your steps mirror automatically to the shared offsite Firestore project (EU region) for a real-time leaderboard, with offline fallback so nothing is lost when Wi-Fi drops.

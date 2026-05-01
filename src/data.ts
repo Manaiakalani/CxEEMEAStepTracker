@@ -75,6 +75,20 @@ export const CHALLENGES: ChallengeDef[] = [
       "Skip the conf room. A walking 1:1 from Marienplatz to the Isar bridges and back — long enough for the real conversation, short enough to make the next session.",
     target: 11000,
   },
+  {
+    id: "msr-cambridge",
+    name: "MSR Cambridge Mile",
+    story:
+      "In 1997 Microsoft Research opened its first lab outside Redmond, on the river Cam. Walk the Backs from Magdalene Bridge down past King's and Trinity, then back up — once for the founding paper, once for the citation.",
+    target: 18000,
+  },
+  {
+    id: "hannover-cebit",
+    name: "Hannover Halle Marathon",
+    story:
+      "Cebit at the Hannover Messe — the EMEA tech pilgrimage from 1986 through 2018, where Bill Gates keynoted half the late '90s. Twenty-seven exhibition halls, miles of carpet. Walk it like you're chasing a demo schedule.",
+    target: 20000,
+  },
 ];
 
 export type SeedTeam = {
