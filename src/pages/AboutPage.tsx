@@ -326,6 +326,22 @@ export function AboutPage() {
           </section>
         );
       })}
+
+      {/*
+        Discreet admin entry point. Intentionally low-contrast and unlabeled
+        beyond a single short phrase so it doesn't catch a casual reader's
+        eye, but lets organisers reach the gated /admin route without having
+        to remember the URL.
+      */}
+      <div className="max-w-[1200px] mx-auto px-6 sm:px-10 py-6 flex justify-end">
+        <a
+          href="/admin"
+          className="text-[11px] tracking-tight hover:underline transition-colors"
+          style={{ color: MUTED, opacity: 0.6 }}
+        >
+          Admin sign-in →
+        </a>
+      </div>
     </>
   );
 }
