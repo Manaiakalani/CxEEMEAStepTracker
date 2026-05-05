@@ -32,7 +32,7 @@ import {
  * protect secrets.
  */
 const ADMIN_HASH =
-  "7f07d917fe4816c5c887a919563f082ebba493158e3d6aa784fa6db1d1315a62";
+  "20cac9a9c0c41b29922cadef04f32e7a578710c250a14d4a7d69eea369dfb466";
 const SESSION_FLAG = "alpine-step-tracker:admin-session";
 
 async function sha256Hex(input: string): Promise<string> {
@@ -196,7 +196,7 @@ function AdminLogin({ onAuthed }: { onAuthed: () => void }) {
           className="text-[13.5px] mt-2 mb-6"
           style={{ color: MUTED }}
         >
-          Enter the shared admin password to view all walkers.
+          Enter the shared password to view all walkers.
         </p>
         <label
           className="text-[12px] tracking-tight block mb-2"
@@ -365,7 +365,7 @@ function AdminDashboard({ onSignOut }: { onSignOut: () => void }) {
                   ? "Cloud sync isn't configured."
                   : status === "connecting"
                     ? "Connecting to live data…"
-                    : "No walkers yet."}
+                    : "No walkers have logged steps yet."}
               </h1>
             </div>
           </section>
@@ -416,7 +416,7 @@ function AdminDashboard({ onSignOut }: { onSignOut: () => void }) {
           className="max-w-[1200px] mx-auto px-6 sm:px-10 py-8 text-[12px] tracking-tight"
           style={{ color: MUTED }}
         >
-          Admin view · live · 7-day rolling totals · today &amp; last-update derived per device
+          Admin view · live · 7-day rolling totals
         </div>
       </footer>
     </div>
@@ -499,7 +499,7 @@ function WinnerHero({
             </p>
           )}
         </div>
-        <div className="col-span-12 md:col-span-4 grid grid-cols-2 md:grid-cols-1 gap-3 content-start">
+        <div className="col-span-12 md:col-span-4 grid grid-cols-3 md:grid-cols-1 gap-3 content-start">
           <MiniStat label="Total Stomp" value={formatNumber(total)} hint={`${formatNumber(totalToday)} today`} />
           <MiniStat
             label="Walkers"
@@ -805,7 +805,7 @@ function RosterTable({
                   title={
                     row.updatedAt
                       ? new Date(row.updatedAt).toLocaleString()
-                      : "Never"
+                      : "No updates yet"
                   }
                 >
                   {row.updatedAt ? relativeTime(row.updatedAt) : "—"}
