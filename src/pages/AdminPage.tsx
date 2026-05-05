@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { LogOut, Lock, Trophy, Search } from "lucide-react";
+import { LogOut, Lock, Trophy, Search, Download } from "lucide-react";
 import { isFirebaseConfigured } from "../firebase-config";
 import {
   ensureAnonUser,
@@ -381,16 +381,32 @@ function AdminDashboard({ onSignOut }: { onSignOut: () => void }) {
               activeNow={activeIn5Min}
             />
             <Podium rows={aggregated.slice(0, 3)} />
-            <RosterToggle
-              filtered={filtered}
-              sorted={sorted}
-              max={max}
-              filter={filter}
-              setFilter={setFilter}
-              sortBy={sortBy}
-              setSortBy={setSortBy}
-              count={aggregated.length}
-            />
+            <section>
+              <div className="max-w-[1200px] mx-auto px-6 sm:px-10 py-10">
+                <div className="flex items-baseline justify-between flex-wrap gap-3 mb-1">
+                  <h2
+                    className="text-[18px] font-semibold tracking-tight"
+                    style={{ color: INK }}
+                  >
+                    Full roster
+                  </h2>
+                  <p className="text-[12px] tracking-tight" style={{ color: MUTED }}>
+                    {aggregated.length}{" "}
+                    {aggregated.length === 1 ? "walker" : "walkers"}
+                  </p>
+                </div>
+                <RosterTable
+                  filtered={filtered}
+                  sorted={sorted}
+                  max={max}
+                  filter={filter}
+                  setFilter={setFilter}
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                  allRows={aggregated}
+                />
+              </div>
+            </section>
           </>
         )}
       </main>
@@ -607,33 +623,53 @@ function Podium({ rows }: { rows: AdminRow[] }) {
   );
 }
 
-function RosterToggle(props: {
-  filtered: AdminRow[];
-  sorted: AdminRow[];
-  max: number;
-  filter: string;
-  setFilter: (v: string) => void;
-  sortBy: SortKey;
-  setSortBy: (v: SortKey) => void;
-  count: number;
-}) {
-  const [open, setOpen] = useState(false);
+function ExportCsvButton({ rows }: { rows: AdminRow[] }) {
+  const handleClick = () => {
+    const header = ["Rank", "Name", "Team", "7-day steps", "Today", "Last update (ISO)"];
+    const sorted = [...rows].sort((a, b) => b.steps - a.steps);
+    const escape = (v: string) => {
+      const s = String(v ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = [header.join(",")];
+    sorted.forEach((r, i) => {
+      lines.push(
+        [
+          i + 1,
+          escape(r.name),
+          escape(r.team),
+          r.steps,
+          r.today,
+          r.updatedAt ? new Date(r.updatedAt).toISOString() : "",
+        ].join(","),
+      );
+    });
+    const csv = "\ufeff" + lines.join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    a.href = url;
+    a.download = `step-tracker-roster-${stamp}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
   return (
-    <section>
-      <div className="max-w-[1200px] mx-auto px-6 sm:px-10 py-10">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          className="text-[13px] font-medium tracking-tight hover:underline transition-colors"
-          style={{ color: BAYERN }}
-        >
-          {open ? "Hide" : "Show"} full roster ({props.count}{" "}
-          {props.count === 1 ? "walker" : "walkers"})
-        </button>
-        {open && <RosterTable {...props} />}
-      </div>
-    </section>
+    <button
+      type="button"
+      onClick={handleClick}
+      className="h-10 inline-flex items-center gap-2 px-4 rounded-full text-[13px] font-medium tracking-tight transition-colors"
+      style={{
+        border: `1px solid ${HAIRLINE}`,
+        background: "var(--surface)",
+        color: INK,
+      }}
+    >
+      <Download className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
+      Export CSV
+    </button>
   );
 }
 
@@ -645,6 +681,7 @@ function RosterTable({
   setFilter,
   sortBy,
   setSortBy,
+  allRows,
 }: {
   filtered: AdminRow[];
   sorted: AdminRow[];
@@ -653,10 +690,12 @@ function RosterTable({
   setFilter: (v: string) => void;
   sortBy: SortKey;
   setSortBy: (v: SortKey) => void;
+  allRows: AdminRow[];
 }) {
   return (
     <div className="mt-6">
       <div className="flex items-center justify-end gap-3 flex-wrap mb-6">
+        <ExportCsvButton rows={allRows} />
         <SortToggle value={sortBy} onChange={setSortBy} />
         <label
           className="relative h-10 inline-flex items-center"
