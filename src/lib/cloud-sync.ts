@@ -34,6 +34,12 @@ export type LeaderboardEntry = {
   name: string;
   team: string;
   entries: Record<string, number>;
+  /**
+   * Server timestamp (ms since epoch) of the last write, or null if the
+   * doc hasn't received a serverTimestamp yet (will be null briefly during
+   * the first push from a fresh client).
+   */
+  updatedAt: number | null;
 };
 
 type FirebaseHandles = {
@@ -164,6 +170,10 @@ export function subscribeLeaderboard(
         snap.forEach((d) => {
           const data = d.data() as Partial<UserSnapshot> | undefined;
           if (!data) return;
+          const ts = (d.data() as { updatedAt?: { toMillis?: () => number } })
+            .updatedAt;
+          const updatedAt =
+            ts && typeof ts.toMillis === "function" ? ts.toMillis() : null;
           rows.push({
             uid: d.id,
             name: typeof data.name === "string" ? data.name : "",
@@ -172,6 +182,7 @@ export function subscribeLeaderboard(
               data.entries && typeof data.entries === "object"
                 ? (data.entries as Record<string, number>)
                 : {},
+            updatedAt,
           });
         });
         cb(rows);
