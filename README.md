@@ -149,3 +149,7 @@ Issues and PRs are welcome. Please:
 ## 📄 License
 
 [MIT](./LICENSE)
+
+## Changelog
+
+See [`CHANGELOG.md`](./CHANGELOG.md) for the tagged history. Current release: **v0.1.0**.
