@@ -57,12 +57,12 @@ enforced without anyone making accounts.
    VITE_FIREBASE_MEASUREMENT_ID=G-…
    ```
 
-   **For Azure Static Web Apps CI** — open
-   **Repo → Settings → Secrets and variables → Actions → New repository
-   secret** and add each variable above as a separate secret with the same
-   name. The `.github/workflows/azure-static-web-apps-*.yml` workflow
-   passes them into the Oryx-driven Vite build via the deploy step's
-   `env:` block.
+   **For a hosted build** — set each `VITE_FIREBASE_*` variable in the
+   static host's environment (or as GitHub Actions secrets if you add a
+   build workflow). They must be present at `vite build` time so the
+   bundle is wired up to the project. This repo no longer ships a
+   deploy workflow; the previous Azure Static Web Apps pipeline has
+   been retired.
 
 4. Once `VITE_FIREBASE_API_KEY` and `VITE_FIREBASE_APP_ID` are present at
    build time, `isFirebaseConfigured()` returns `true` and cloud sync runs
@@ -81,14 +81,11 @@ for forks. Keep them in env vars and lock them down at the platform layer:
   [Google Cloud Console → APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials?project=cxeemeastep),
   open the Firebase browser key and set **Application restrictions →
   Websites** to:
-  - `https://gentle-cliff-07e205d03.7.azurestaticapps.net/*` ← **required**
-    (browsers send the bare origin as `Referer` due to the default
-    `strict-origin-when-cross-origin` policy, so a narrower path-scoped
-    pattern would reject every real browser request with HTTP 403)
-  - `https://gentle-cliff-07e205d03.7.azurestaticapps.net` (some browsers
-    send Referer with no trailing slash)
-  - Any custom domain you wire up to the Static Web App, in both
-    `https://example.com/*` and bare-origin variants.
+  - Your production origin, both `https://example.com/*` and the bare
+    origin `https://example.com` (browsers send the bare origin as
+    `Referer` due to the default `strict-origin-when-cross-origin`
+    policy, so a narrower path-scoped pattern would reject every real
+    browser request with HTTP 403)
   - `http://localhost:5173/*` and `http://localhost:5173` (local dev)
 - **API restrictions** — Limit the key to the APIs the app actually needs:
   Identity Toolkit API, Cloud Firestore API, Firebase Installations API,
@@ -190,20 +187,17 @@ consistent with GDPR storage-limitation principles.
 **"Cloud not configured" pill on Profile.**
 The `VITE_FIREBASE_*` environment variables aren't reaching the build.
 For local dev, copy `.env.example` to `.env.local` and fill it in. For
-the Azure Static Web Apps build, make sure the matching repo secrets
-exist (Settings → Secrets and variables → Actions) and that they are
-listed in the deploy step's `env:` block in
-`.github/workflows/azure-static-web-apps-*.yml`. Re-run the workflow
-after any secret change.
+a hosted build, make sure the same variables are set in the host's
+environment (or GitHub Actions secrets, if you add a build workflow)
+and rebuild after any change.
 
 **"Retrying…" pill with `auth/network-request-failed` or `Requests from referer … are blocked` in the browser console.**
 The API key's HTTP-referrer restriction is too narrow. Browsers default
 to `Referrer-Policy: strict-origin-when-cross-origin`, which sends only
-the *origin* (e.g. `https://gentle-cliff-07e205d03.7.azurestaticapps.net/`)
-as `Referer`, **not** the full path. A path-scoped pattern will
-therefore reject every real browser request with HTTP 403. Fix by
-adding the bare-origin and `/*` variants of the deployed hostname (and
-any custom domain) to the allowed websites in
+the *origin* (e.g. `https://example.com/`) as `Referer`, **not** the
+full path. A path-scoped pattern will therefore reject every real
+browser request with HTTP 403. Fix by adding the bare-origin and `/*`
+variants of the deployed hostname to the allowed websites in
 [GCP Credentials](https://console.cloud.google.com/apis/credentials?project=cxeemeastep).
 Changes propagate within a couple of minutes.
 

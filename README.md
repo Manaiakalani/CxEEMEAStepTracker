@@ -1,11 +1,12 @@
-# Step Tracker
+# CxE EMEA Offsite 2026 — Step Tracker
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-1761A0.svg)](./LICENSE)
 
-A lightweight, mobile-friendly step-tracking web app for short team
-events. Drop in a roster of teams, set a daily goal, and let participants
-log their steps from any device — totals roll up live into per-walker and
-per-team leaderboards backed by an optional Firebase cloud sync.
+A lightweight, mobile-friendly step-tracking web app for the CxE EMEA
+Offsite 2026 in Munich. Drop in a roster of teams, set a daily goal, and
+let participants log their steps from any device — totals roll up live
+into per-walker and per-team leaderboards backed by an optional Firebase
+cloud sync.
 
 ## ✨ Features
 
@@ -42,8 +43,8 @@ into any other project that wants the same visual language.
 ### Install
 
 ```bash
-git clone <your-fork-url>
-cd <repo-name>
+git clone https://github.com/Manaiakalani/CxEEMEAStepTracker.git
+cd CxEEMEAStepTracker
 npm install
 ```
 
@@ -127,10 +128,15 @@ referrer allowlist for production.
 
 ## 🚢 Hosting
 
-The app is a plain static SPA, so it deploys cleanly to any static host.
-The repo includes a `staticwebapp.config.json` with sensible SPA fallback
-and asset cache headers if you choose Azure Static Web Apps; equivalent
-config for Netlify / Vercel / Cloudflare Pages is a one-file change.
+The app is a static SPA. Run `npm run build` and publish the `dist/`
+folder to any static host (Firebase Hosting, Netlify, Cloudflare Pages,
+GitHub Pages, and similar). There is no CI/CD pipeline in this repo:
+the previous Azure Static Web Apps site has been retired, and pushes
+to `main` no longer deploy anywhere.
+
+For a production build with cloud sync, inject the `VITE_FIREBASE_*`
+variables at build time (see `.env.example` and
+[`docs/firebase-setup.md`](./docs/firebase-setup.md)).
 
 ## 🤝 Contributing
 

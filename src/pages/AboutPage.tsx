@@ -222,8 +222,8 @@ const SECTIONS: Section[] = [
           </li>
           <li>
             <strong>Third parties.</strong> An EU-region cloud database for
-            sync, Google Fonts (the <em>Inter</em> typeface), and Azure
-            Static Web Apps for hosting. Nothing else.
+            sync and Google Fonts (the <em>Inter</em> typeface). Nothing
+            else.
           </li>
         </ul>
       </>

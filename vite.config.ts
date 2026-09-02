@@ -3,8 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  // Azure Static Web Apps serves the app at the domain root, so assets
-  // resolve relative to "/". (Previously "/CxEEMEAStepTracker/" for GH Pages.)
+  // Served from the domain root, so assets resolve relative to "/".
   base: "/",
   plugins: [react(), tailwindcss()],
   build: {

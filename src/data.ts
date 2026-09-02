@@ -86,7 +86,7 @@ export const CHALLENGES: ChallengeDef[] = [
     id: "hannover-cebit",
     name: "Hannover Halle Marathon",
     story:
-      "Cebit at the Hannover Messe — the EMEA tech pilgrimage from 1986 through 2018, where Bill Gates keynoted half the late '90s. Twenty-seven exhibition halls, miles of carpet. Walk it like you're chasing a demo schedule.",
+      "CeBIT at the Hannover Messe — the EMEA tech pilgrimage from 1986 through 2018. Twenty-seven exhibition halls, miles of carpet. Walk it like you're chasing a demo schedule.",
     target: 20000,
   },
 ];
@@ -101,17 +101,16 @@ export type SeedTeam = {
  * used to map team picks in the UI to live aggregated rows in the
  * leaderboard. Step totals and walker counts are derived live from
  * registered walkers (see `leaderboardWith` in store.ts), not stored
- * statically here. Display name encodes the team lead so the directory
- * also doubles as a human point-of-contact list.
+ * statically here.
  */
 export const TEAMS: SeedTeam[] = [
-  { id: "care", name: "Care / Aleks" },
-  { id: "uem", name: "UEM / Craig" },
-  { id: "mtp", name: "MTP / Diego" },
-  { id: "purview", name: "Purview / Nishan" },
-  { id: "ccp", name: "CCP / Mags" },
-  { id: "shared-services", name: "Shared Services / Kim" },
-  { id: "idna", name: "IDNA / Travis" },
+  { id: "care", name: "Care" },
+  { id: "uem", name: "UEM" },
+  { id: "mtp", name: "MTP" },
+  { id: "purview", name: "Purview" },
+  { id: "ccp", name: "CCP" },
+  { id: "shared-services", name: "Shared Services" },
+  { id: "idna", name: "IDNA" },
   { id: "cxe-lt", name: "CxE LT" },
 ];
 
@@ -123,16 +122,23 @@ export const TEAMS: SeedTeam[] = [
  * case-insensitive and whitespace-trimmed.
  */
 export const LEGACY_TEAM_MAP: Record<string, string> = {
-  "care": "Care / Aleks",
-  "threat protection": "MTP / Diego",
-  "mtp": "MTP / Diego",
-  "purview/ces": "Purview / Nishan",
-  "purview / ces": "Purview / Nishan",
-  "purview": "Purview / Nishan",
-  "idna": "IDNA / Travis",
-  "ccp": "CCP / Mags",
-  "shared services": "Shared Services / Kim",
-  "uem": "UEM / Craig",
+  "care": "Care",
+  "care / aleks": "Care",
+  "threat protection": "MTP",
+  "mtp": "MTP",
+  "mtp / diego": "MTP",
+  "purview/ces": "Purview",
+  "purview / ces": "Purview",
+  "purview": "Purview",
+  "purview / nishan": "Purview",
+  "idna": "IDNA",
+  "idna / travis": "IDNA",
+  "ccp": "CCP",
+  "ccp / mags": "CCP",
+  "shared services": "Shared Services",
+  "shared services / kim": "Shared Services",
+  "uem": "UEM",
+  "uem / craig": "UEM",
   "cxe lt": "CxE LT",
 };
 
