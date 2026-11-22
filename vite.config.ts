@@ -10,17 +10,16 @@ export default defineConfig({
     chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
-        manualChunks: {
+        // Vite 8 (Rolldown) only accepts manualChunks as a function.
+        manualChunks(id: string) {
+          if (!id.includes("node_modules")) return undefined;
           // Keep Firebase off the critical path so first paint of the
           // dashboard doesn't wait on ~200 KB of SDK code.
-          firebase: [
-            "firebase/app",
-            "firebase/auth",
-            "firebase/firestore",
-          ],
+          if (/[\\/]node_modules[\\/]@?firebase[\\/]/.test(id)) return "firebase";
           // React vendor chunk benefits from long-term caching across
           // app updates that don't change the framework version.
-          react: ["react", "react-dom"],
+          if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return "react";
+          return undefined;
         },
       },
     },
